@@ -11,6 +11,19 @@
         padding: 0;
         margin: 0;
     }
+
+    table {
+        border-top: 3px solid #000000;
+    }
+
+    tr {
+        border-left: 3px solid #000000;
+        border-bottom: 3px solid #000000;
+    }
+
+    td {
+        border-right: 3px solid #000000;
+    }
 </style>
 <body>
 <div>
@@ -27,8 +40,8 @@
         </tr>
         @foreach($data['info']['env']['app'] as $key=>$value)
             <tr>
-                <td></td>
-                <td></td>
+                <td>{{ $key }}</td>
+                <td>{{ $value }}</td>
             </tr>
         @endforeach
         @foreach($data['info']['env']['log'] as $key=>$value)
