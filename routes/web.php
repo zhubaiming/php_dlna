@@ -59,7 +59,7 @@ Route::get('/', function () {
                     'faker_locale' => config('app.faker_locale'),
                     'key' => config('app.key'),
                     'cipher' => config('app.cipher'),
-                    'maintenance' => config('app.maintenance')
+//                    'maintenance' => config('app.maintenance')
                 ]
             ]
         ]
