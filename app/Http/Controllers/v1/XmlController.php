@@ -9,7 +9,7 @@ class XmlController extends Controller
 {
     public function xml2json(Request $request)
     {
-        $data = $request->post('data');
+        $data = $request->post('xml');
 
         if ($xmlArr = simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA)) {
             $code = 200;
@@ -26,5 +26,12 @@ class XmlController extends Controller
             'msg' => $msg,
             'data' => $result
         ], 320);
+    }
+
+    public function json2xml(Request $request)
+    {
+        $data = $request->post('data');
+
+        $result = '<\?xml version=\"1.0\"\?>';
     }
 }
