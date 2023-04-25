@@ -11,10 +11,20 @@ class XmlController extends Controller
     {
         $data = $request->post('data');
 
-        $xmlparser = xml_parser_create();
-        xml_parse_into_struct($xmlparser, $data, $result);
-        xml_parser_free($xmlparser);
+        if ($xmlArr = simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA)) {
+            $code = 200;
+            $msg = 'ok';
+            $result = json_decode(json_encode($xmlArr, 320), true);
+        } else {
+            $code = 0;
+            $msg = 'false';
+            $result = [];
+        }
 
-        dd($result);
+        return json_encode([
+            'code' => $code,
+            'msg' => $msg,
+            'data' => $result
+        ], 320);
     }
 }
