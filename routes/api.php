@@ -21,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
+Route::post('/parameters2xml', [XmlController::class, 'parameters2xml']);
