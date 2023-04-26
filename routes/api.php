@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('wechatMini')->group(function () {
-    Route::post('/login', [OpenController::class], 'login');
+    Route::post('/login', [OpenController::class, 'login']);
 });
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
