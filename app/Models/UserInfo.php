@@ -9,7 +9,7 @@ class UserInfo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['openid', 'session_key'];
+    protected $guarded = [];
 
     public $timestamps = false;
 }
