@@ -10,4 +10,6 @@ class UserInfo extends Model
     use HasFactory;
 
     protected $fillable = ['openid', 'session_key'];
+
+    public $timestamps = false;
 }
