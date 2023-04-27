@@ -24,9 +24,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('wechatMini')->group(function () {
     Route::post('/login', [OpenController::class, 'login']);
+    Route::get('/mediaList/{type}', [MediaController::class, 'index']);
 });
-
-Route::get('/mediaList/{type}', [MediaController::class, 'index']);
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
 Route::post('/parameters2xml', [XmlController::class, 'parameters2xml']);
