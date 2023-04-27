@@ -66,10 +66,19 @@
             <td colspan="2">config 配置相关信息</td>
         </tr>
         @foreach($data['info']['config']['app'] as $key=>$value)
-            <tr>
-                <td>{{ $key }}</td>
-                <td>{{ $value }}</td>
-            </tr>
+            @if(is_array($value))
+                @foreach($value as $k=>$v)
+                    <tr>
+                        <td>{{ $k }}</td>
+                        <td>{{ $v }}</td>
+                    </tr>
+                @endforeach
+            @else
+                <tr>
+                    <td>{{ $key }}</td>
+                    <td>{{ $value }}</td>
+                </tr>
+            @endif
         @endforeach
     </table>
 </div>

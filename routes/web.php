@@ -60,6 +60,7 @@ Route::get('/', function () {
                     'key' => config('app.key'),
                     'cipher' => config('app.cipher'),
 //                    'maintenance' => config('app.maintenance')
+                    'providers' => config('app.providers')
                 ]
             ]
         ]
