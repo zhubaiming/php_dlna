@@ -28,10 +28,28 @@ class XmlController extends Controller
         ], 320);
     }
 
-    public function json2xml(Request $request)
+    public function parameters2xml(Request $request)
     {
-        $data = $request->post('data');
+        $data = $request->post();
 
-        $result = '<\?xml version=\"1.0\"\?>';
+        $code = 200;
+        $msg = 'ok';
+
+        $result = '<?xml version="1.0"?>' .
+            '<s:Envelop xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">' .
+            '<s:Body>' .
+            '<u:' . $data['action'] . ' xmlns:u="' . $data['serviceType'] . '">' .
+            '<InstanceID>' . $data['parameters']['InstanceID'] . '</InstanceID>' .
+            '<CurrentURI>' . $data['parameters']['CurrentURI'] . '</CurrentURI>' .
+            '</u:SetAVTransportURI>' .
+            '</s:Body>' .
+            '</s:Envelop>';
+
+        return json_encode([
+            'code' => $code,
+            'msg' => $msg,
+            'data' => $result
+        ], 320);
     }
+
 }
