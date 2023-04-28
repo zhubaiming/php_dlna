@@ -2,18 +2,14 @@
 
 namespace App\Http\Resources\wechatMini;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\JsonResource as BaseJsonResource;
 
-class JsonResource extends JsonResource
+class JsonResource extends BaseJsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public static $wrap = 'list';
+
+    protected static function newCollection($resource)
     {
-        return parent::toArray($request);
+        return new ResourceCollection($resource, static::class);
     }
 }

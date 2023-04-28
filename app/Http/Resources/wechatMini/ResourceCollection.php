@@ -3,17 +3,22 @@
 namespace App\Http\Resources\wechatMini;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Resources\Json\ResourceCollection as BaseCollection;
 
-class ResourceCollection extends ResourceCollection
+class ResourceCollection extends BaseCollection
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @return array<int|string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function paginationInformation($request, $paginated, $default): array
     {
-        return parent::toArray($request);
+        return [
+            'nextPage' => $paginated['next_page_url'] ?? false,
+        ];
+    }
+
+    public function with(Request $request): array
+    {
+        return [
+            'code' => 0,
+            'msg' => 'ok'
+        ];
     }
 }
