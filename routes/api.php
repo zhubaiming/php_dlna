@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\v1\wechatMini\OpenController;
 use App\Http\Controllers\v1\XmlController;
-use App\Http\Controllers\v1\MediaController;
+use App\Http\Controllers\v1\wechatMini\MediaController;
 
 /*
 |--------------------------------------------------------------------------
