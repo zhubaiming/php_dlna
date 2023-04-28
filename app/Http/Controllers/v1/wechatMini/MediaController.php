@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\wechatMini;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\wechatMini\MediaResource;
+use App\Models\Media;
 use Illuminate\Http\Request;
 
 class MediaController extends Controller
@@ -10,9 +12,16 @@ class MediaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(string $type)
     {
-        //
+        $type = match ($type) {
+            'video' => 1,
+            'audio' => 2,
+            'image' => 3,
+            default => -1
+        };
+
+        return MediaResource::collection(Media::where(['type' => $type])->paginate(10));
     }
 
     /**
