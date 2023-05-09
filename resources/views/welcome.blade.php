@@ -81,6 +81,8 @@
             @endif
         @endforeach
     </table>
+    <hr>
+    @php(phpinfo())
 </div>
 </body>
 </html>
