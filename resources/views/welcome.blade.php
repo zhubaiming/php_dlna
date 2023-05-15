@@ -82,7 +82,7 @@
         @endforeach
     </table>
     <hr>
-    @php(phpinfo())
+{{--    @php(phpinfo())--}}
 </div>
 </body>
 </html>

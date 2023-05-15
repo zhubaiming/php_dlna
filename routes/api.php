@@ -25,7 +25,38 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('wechatMini')->group(function () {
     Route::post('/login', [OpenController::class, 'login']);
     Route::get('/mediaList/{type}', [MediaController::class, 'index']);
+    Route::get('/mediaDetail', [MediaController::class, 'show']);
 });
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
 Route::post('/parameters2xml', [XmlController::class, 'parameters2xml']);
+
+Route::get('/test', function () {
+    for ($i = 31; $i < 102; $i++) {
+        $url = 'https://www.netfly.tv/vod/play/101961-1-' . $i . '.html';
+
+        $curl = curl_init();
+
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+
+        $output = curl_exec($curl);
+
+        curl_close($curl);
+
+        $result = substr($output, strpos($output, 'player_aaaa') + 12);
+
+        $result = substr($result, 0, strpos($result, '<'));
+
+        $result = json_decode($result, true);
+
+        $indexUrl = $result['url'];
+
+        $m3u8Prefix = array_reverse(explode('/', $indexUrl))[1];
+
+        \Illuminate\Support\Facades\Log::info($i . ' => \'' . $m3u8Prefix . '\',');
+    }
+
+    return 'ok';
+});

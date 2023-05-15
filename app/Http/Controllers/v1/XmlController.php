@@ -11,6 +11,9 @@ class XmlController extends Controller
     {
         $data = $request->post('xml');
 
+        $data = preg_replace('/<[a-z]+:/', '<', $data);
+        $data = preg_replace('/<(\/*)[a-z]+:/', '</', $data);
+
         if ($xmlArr = simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA)) {
             $code = 200;
             $msg = 'ok';
@@ -28,22 +31,24 @@ class XmlController extends Controller
         ], 320);
     }
 
-    public function parameters2xml(Request $request)
+    public
+    function parameters2xml(Request $request)
     {
         $data = $request->post();
 
         $code = 200;
         $msg = 'ok';
 
-        $result = '<?xml version="1.0"?>' .
-            '<s:Envelop xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">' .
+        $result = '<?xml version="1.0" encoding="utf-8" standalone="no"?>' .
+            '<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">' .
             '<s:Body>' .
-            '<u:' . $data['action'] . ' xmlns:u="' . $data['serviceType'] . '">' .
-            '<InstanceID>' . $data['parameters']['InstanceID'] . '</InstanceID>' .
-            '<CurrentURI>' . $data['parameters']['CurrentURI'] . '</CurrentURI>' .
-            '</u:SetAVTransportURI>' .
+            '<u:' . $data['action'] . ' xmlns:u="' . $data['serviceType'] . '">';
+        foreach ($data['parameters'] as $key => $value) {
+            $result .= '<' . $key . '>' . $value . '</' . $key . '>';
+        }
+        $result .= '</u:' . $data['action'] . '>' .
             '</s:Body>' .
-            '</s:Envelop>';
+            '</s:Envelope>';
 
         return json_encode([
             'code' => $code,
