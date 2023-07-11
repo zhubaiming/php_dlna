@@ -9,9 +9,10 @@ class ResourceCollection extends BaseCollection
 {
     public function paginationInformation($request, $paginated, $default): array
     {
-        return [
-            'nextPage' => $paginated['next_page_url'] ?? null,
-        ];
+//        return [
+//            'nextPage' => $paginated['next_page_url'] ?? null,
+//        ];
+        return [];
     }
 
     public function with(Request $request): array

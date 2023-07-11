@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\v1\wechatMini\OpenController;
 use App\Http\Controllers\v1\XmlController;
+use App\Http\Controllers\v1\wechatMini\MediaCateController;
 use App\Http\Controllers\v1\wechatMini\MediaController;
 
 /*
@@ -24,7 +25,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('wechatMini')->group(function () {
     Route::post('/login', [OpenController::class, 'login']);
-    Route::get('/mediaList/{type}', [MediaController::class, 'index']);
+    Route::get('/cateList', [MediaCateController::class, 'index']);
+    Route::get('/mediaList', [MediaController::class, 'index']);
+//    Route::get('/mediaList/{pType}/{type}', [MediaController::class, 'index']);
     Route::get('/mediaDetail', [MediaController::class, 'show']);
 });
 

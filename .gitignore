@@ -20,3 +20,5 @@ yarn-error.log
 /.editorconfig
 composer.json
 /.DS_Store
+docker-compose.yml
+/docker

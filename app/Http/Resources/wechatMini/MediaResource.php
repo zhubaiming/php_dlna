@@ -19,10 +19,11 @@ class MediaResource extends JsonResource
             'area' => $this->area,
             'year' => $this->year,
             'lang' => $this->lang,
+            'coverPic' => $this->coverPic,
             'typeName' => $this->typeName,
             'source' => $this->source,
             'version' => $this->version,
-            'coverPic' => $this->coverPic,
+            'status' => $this->status
         ];
     }
 }

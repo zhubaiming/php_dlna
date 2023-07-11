@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\v1\wechatMini;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\wechatMini\MediaCollection;
-use App\Http\Resources\wechatMini\MediaResource;
-use App\Models\Media;
+use App\Http\Resources\wechatMini\CateSourceCollection;
+use App\Models\CateSource;
 use Illuminate\Http\Request;
 
-class MediaController extends Controller
+class MediaCateController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        return new MediaCollection(Media::where(['cateId' => $request->query('cid')])->paginate(10));
+        return new CateSourceCollection(CateSource::where('pid', '!=', 0)->orderBy('id')->get());
     }
 
     /**
@@ -37,9 +36,9 @@ class MediaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function show(string $id)
     {
-        return Media::with(['urls'])->findOrFail($request->query('id'));
+        //
     }
 
     /**
