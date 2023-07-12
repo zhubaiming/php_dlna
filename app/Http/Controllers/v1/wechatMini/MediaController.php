@@ -39,7 +39,7 @@ class MediaController extends Controller
      */
     public function show(Request $request)
     {
-        return Media::with(['urls'])->findOrFail($request->query('id'));
+        return new MediaResource(Media::with(['urls'])->findOrFail($request->query('id')));
     }
 
     /**
