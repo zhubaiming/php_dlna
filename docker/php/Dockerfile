@@ -15,3 +15,12 @@ RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
     && apk del --purge .phpize-deps
 
 WORKDIR /var/www/html
+networks:
+  container_bridge:
+    external:
+      name: local_bridge
+
+
+networks:
+  local_bridge:
+    external: true

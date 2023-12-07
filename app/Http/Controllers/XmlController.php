@@ -20,14 +20,31 @@ class XmlController extends Controller
             $data = json_decode(json_encode($xmlArr, 256 + 64 + 32), true);
 
             $data['URLBase'] = $data['URLBase'] ?? $matches[0];
+
+            $data['device']['icon'] = array_key_exists('device', $data) && array_key_exists('iconList', $data['device']) ? $data['URLBase'] . $this->getDeviceMaxDepthIconUrl($data['device']['iconList']['icon']) : '';
         }
 
         return response()->json([
             'code' => 200,
-            'status' => true,
-            'data' => $data,
-            'message' => 'ok'
+            'message' => 'ok',
+            'data' => $data
         ]);
+    }
+
+    private function getDeviceMaxDepthIconUrl($list)
+    {
+        $depth = 0;
+        $width = 0;
+        $k = -1;
+        foreach ($list as $key => $val) {
+            if ($width <= $val['width'] && $depth <= $val['depth']) {
+                $depth = $val['depth'];
+                $width = $val['width'];
+                $k = $key;
+            }
+        }
+
+        return $list[$k];
     }
 
     /**
@@ -66,5 +83,23 @@ class XmlController extends Controller
      *
      * return new JsonResource(['data' => $result]);
      * }
+     */
+
+    /**
+     * <DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:netease="http://music.163.com/dlna/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/">
+     * <item id="" parentID="" restricted="">
+     * <dc:title>标题名</dc:title>
+     * <dc:creator>导演</dc:creator>
+     * <dc:date></dc:date>
+     * <dc:description>zzbbmm</dc:description>
+     * <dc:genre>Rock</dc:genre>
+     * <upnp:album>专辑名</upnp:album>
+     * <upnp:albumArtURI>http://p1.music.126.net/UTrFxVAoq-Qh50dB_M74dw==/51677046522530.jpg</upnp:albumArtURI>
+     * <upnp:artist>演员</upnp:artist>
+     * <upnp:region>REGION US</upnp:region>
+     * <upnp:class>object.item.videoItem</upnp:class>
+     * <res duration="" protocolInfo="http-get:*:video/mp4:DLNA.ORG_OP=01">https://vip.ffzy-online6.com/20231127/22165_a1ec3734/index.m3u8</res>
+     * </item>
+     * </DIDL-Lite>
      */
 }

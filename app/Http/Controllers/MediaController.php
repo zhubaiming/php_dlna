@@ -58,16 +58,14 @@ class MediaController extends Controller
 
             return response()->json([
                 'code' => 200,
-                'status' => true,
-                'data' => $data,
-                'message' => 'ok'
+                'message' => 'ok',
+                'data' => $data
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'code' => -1,
-                'status' => false,
-                'data' => [],
-                'message' => 'ok'
+                'message' => 'ok',
+                'data' => []
             ]);
         }
     }

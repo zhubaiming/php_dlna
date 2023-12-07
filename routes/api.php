@@ -8,6 +8,8 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\XmlController;
 
+use App\Http\Controllers\Dlna\ActionsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -40,49 +42,6 @@ Route::prefix('media')->group(function () {
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
 Route::post('/parameters2xml', [XmlController::class, 'parameters2xml']);
 
-Route::prefix('wechatMini')->group(function () {
-    Route::post('/login', [OpenController::class, 'login']);
-    Route::get('/cateList', function () {
-        return response()->json([
-            'code' => 200,
-            'status' => true,
-            'data' => [
-                [
-                    'id' => 4,
-                    'pid' => 1,
-                    'name' => '电影'
-                ],
-                [
-                    'id' => 5,
-                    'pid' => 1,
-                    'name' => '电视剧'
-                ],
-                [
-                    'id' => 6,
-                    'pid' => 1,
-                    'name' => '综艺'
-                ],
-                [
-                    'id' => 7,
-                    'pid' => 1,
-                    'name' => '动漫'
-                ],
-                [
-                    'id' => 8,
-                    'pid' => 2,
-                    'name' => '音乐'
-                ],
-                [
-                    'id' => 8,
-                    'pid' => 3,
-                    'name' => '相册'
-                ]
-            ],
-            'message' => 'ok'
-        ]);
-    });
-    Route::get('/mediaList', [MediaController::class, 'index']);
-//    Route::get('/mediaList/{pType}/{type}', [MediaController::class, 'index']);
-    Route::get('/mediaDetail', [MediaController::class, 'show']);
+Route::prefix('device')->group(function () {
+    Route::post('/setAVTransportControlBody', [ActionsController::class, 'setAVTransportControlBody']);
 });
-
