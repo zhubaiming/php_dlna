@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MediaSharpnessController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\XmlController;
 
@@ -37,10 +38,12 @@ Route::prefix('music')->group(function () {
 Route::prefix('media')->group(function () {
     Route::get('/index', [MediaController::class, 'index']);
     Route::get('/show', [MediaController::class, 'show']);
+    Route::prefix('sharpness')->group(function () {
+        Route::get('/index', [MediaSharpnessController::class, 'index']);
+    });
 });
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
-Route::post('/parameters2xml', [XmlController::class, 'parameters2xml']);
 
 Route::prefix('device')->group(function () {
     Route::post('/setAVTransportControlBody', [ActionsController::class, 'setAVTransportControlBody']);

@@ -22,7 +22,7 @@ class MediaController extends Controller
             $this->setLimit($input);
         });
 
-        $data = new MediaCollection(Media::where(['cateId' => $request->query('cate_id')])->orderBy('id', 'asc')->simplePaginate(...$this->getPageArray()));
+        $data = new MediaCollection(Media::cateId($request->query('cate_id'))->notDeleted()->simplePaginate(...$this->getPageArray()));
 
         return response()->json([
             'code' => 200,
@@ -50,11 +50,10 @@ class MediaController extends Controller
     /**
      * Display the specified resource.
      */
-//    public function show(string $id)
     public function show(Request $request)
     {
         try {
-            $data = new MediaResource(Media::with('urls')->findOrFail($request->query('id')));
+            $data = new MediaResource(Media::with(['withEpisode'])->findOrFail($request->query('id')));
 
             return response()->json([
                 'code' => 200,

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MediaUrl extends Model
+class MediaEpisode extends Model
 {
     use HasFactory;
 
-    public $table='media_urls';
+    public $table = 'media_episode';
 
     public $timestamps = false;
 }
