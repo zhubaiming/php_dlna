@@ -36,7 +36,16 @@ class Media extends Model
      */
     public function scopeCateId(Builder $query, int $cate_id): void
     {
-        $query->where(['cate_id' => $cate_id]);
+        if (0 != $cate_id) {
+            $query->where(['cate_id' => $cate_id]);
+        }
+    }
+
+    public function scopeYear(Builder $query, int $year): void
+    {
+        if (0 != $year) {
+            $query->where(['year' => $year]);
+        }
     }
 
     public function withEpisode()
