@@ -30,21 +30,13 @@ class UserController extends Controller
 
             $message->sendMsg('toLogin', [$input['prefix'] . $input['phoneNumber'], $code]);
 
-            if (0 != Redis::hSet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'], $code)) {
-                Redis::expire($input['prefix'] . $input['phoneNumber'], 300);
+            Redis::hSet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'], $code);
 
-                return response()->json([
-                    'code' => 200,
-                    'message' => 'ok',
-                    'data' => []
-                ]);
-            } else {
-                return response()->json([
-                    'code' => 999999,
-                    'message' => '服务器redis故障',
-                    'data' => []
-                ]);
-            }
+            return response()->json([
+                'code' => 200,
+                'message' => 'ok',
+                'data' => []
+            ]);
         }
     }
 
