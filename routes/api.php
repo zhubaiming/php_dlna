@@ -9,8 +9,6 @@ use App\Http\Controllers\MediaSharpnessController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\XmlController;
 
-use App\Http\Controllers\Dlna\ActionsController;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -45,6 +43,9 @@ Route::prefix('media')->group(function () {
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
 
-Route::prefix('device')->group(function () {
-    Route::post('/setAVTransportControlBody', [ActionsController::class, 'setAVTransportControlBody']);
+Route::get('/test', function (Request $request) {
+//    $jwt = new \App\Services\JsonWebToken();
+//    return $jwt->createToken();
+
+    dd($request->ip());
 });
