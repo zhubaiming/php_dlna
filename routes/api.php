@@ -50,10 +50,9 @@ Route::get('/test', function (Request $request) {
     var_dump($request->ip());
 
     var_dump(getenv('X-Forwarded-Proto'));
-    var_dump($_SERVER['X-Forwarded-Proto']);
 
     var_dump(getenv('X-Forwarded-For'));
-    var_dump($_SERVER['X-Forwarded-For']);
+    var_dump($_SERVER);
 
     exit();
 });
