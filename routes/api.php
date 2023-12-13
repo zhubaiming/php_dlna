@@ -47,5 +47,22 @@ Route::get('/test', function (Request $request) {
 //    $jwt = new \App\Services\JsonWebToken();
 //    return $jwt->createToken();
 
-    dd($request->ip());
+    var_dump($request->ip());
+
+    var_dump(getenv('X-Forwarded-Proto'));
+
+    var_dump(getenv('HTTP_X_FORWARD_FOR'));
+
+    exit();
+});
+
+Route::post('/test1', function (Request $request) {
+    $lists = $request->post();
+
+    foreach ($lists as $key => $list) {
+        \Illuminate\Support\Facades\DB::table('sources_area')->insert([
+            'name' => $list,
+            'sort' => $key + 1
+        ]);
+    }
 });
