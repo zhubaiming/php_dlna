@@ -54,6 +54,8 @@ Route::get('/test', function (Request $request) {
     var_dump(getenv('X-Forwarded-For'));
     var_dump($_SERVER);
 
+    // ip => $_SERVER['HTTP_X_FORWARDED_FOR']
+
     exit();
 });
 
