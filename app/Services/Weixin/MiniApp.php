@@ -25,7 +25,8 @@ class MiniApp extends Base
             if ($response->successful() && $response->ok()) {
                 return json_decode($response->body(), true);
             } else {
-                dump($response->status());
+//                dump($response->status());
+                dd($response->body());
             }
 
             /**
@@ -66,7 +67,7 @@ class MiniApp extends Base
              * $response->serverError() : bool;         // 500 Internal Server Error判断错误码是5xx
              */
         } catch (ConnectionException $e) {
-
+            dd($e->getMessage());
         }
     }
 }

@@ -59,13 +59,4 @@ Route::get('/test', function (Request $request) {
     exit();
 });
 
-Route::post('/test1', function (Request $request) {
-    $lists = $request->post();
-
-    foreach ($lists as $key => $list) {
-        \Illuminate\Support\Facades\DB::table('sources_area')->insert([
-            'name' => $list,
-            'sort' => $key + 1
-        ]);
-    }
-});
+Route::post('/test1',  [UserController::class, 'test']);
