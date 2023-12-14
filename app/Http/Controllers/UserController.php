@@ -9,6 +9,7 @@ use App\Services\Weixin\MiniApp;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller
@@ -17,11 +18,13 @@ class UserController extends Controller
     {
         $input = $request->input();
 
+        Log::channel('dev')->debug($request->input());
+
         $code = mt_rand(100000, 999999);
 
         $message = new Message('aliyun');
 
-        $message->sendMsg('toLogin', [$input['prefix'] . $input['phoneNumber'], $code]);
+//        $message->sendMsg('toLogin', [$input['prefix'] . $input['phoneNumber'], $code]);
 
         Redis::hSet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'], $code);
 

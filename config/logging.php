@@ -52,6 +52,18 @@ return [
     */
 
     'channels' => [
+        // 记录弃用警告
+//        'deprecations' => [
+//            'driver' => 'single',
+//            'path' => storage_path('logs/php-deprecation-warnings.log')
+//        ],
+        // 开发日志记录
+        'dev' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/dev.log'),
+//            'path' => storage_path('logs/dev/dev' . date('Y-m-d') . '.log'),
+            'replace_placeholders' => true,
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],
@@ -89,7 +101,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
