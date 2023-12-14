@@ -14,6 +14,6 @@ class AncientScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $builder->orderBy('updated_at', 'desc');
+        $builder->orderBy('year', 'desc')->orderBy('updated_at', 'desc');
     }
 }
