@@ -19,34 +19,29 @@ class MediaResource extends JsonResource
         if ($request->is('*/index') || $request->is('*/mediaList')) {
             $arr = [
                 'id' => $this->id,
+                'origin' => $this->origin,
+                'typeName' => $this->type_name,
+                'area' => $this->area_name,
                 'name' => $this->name, // 名称
-                'nameEn' => $this->name_en, // 英文名称
                 'coverPic' => $this->cover_pic, // 封面图片
-                'area' => $this->area, // 地区
                 'year' => $this->year, // 年份
                 'lang' => $this->lang, // 语言
-                'class' => $this->class, // 剧情
-                'typeName' => $this->type_name,
-                'source' => $this->source, // 来源
-//                'version' => $this->version, // 等级
                 'status' => $this->status, // 状态
             ];
         } elseif ($request->is('*/show') || $request->is('*/mediaDetail')) {
             $arr = [
                 'id' => $this->id, //
                 'name' => $this->name, //
-                'nameEn' => $this->name_en, // 英文名称
                 'coverPic' => $this->cover_pic, //
-                'area' => $this->area, //
-                'year' => $this->year, //
-                'lang' => $this->lang, //
-                'class' => $this->class, // 剧情
+                'origin' => $this->origin, //
                 'typeName' => $this->type_name, //
-                'source' => $this->source, //
-                'status' => $this->status, //
+                'area' => $this->area_name, //
                 'director' => $this->director,
                 'actor' => $this->actor, //
-                'blurb' => $this->blurb, //
+                'year' => $this->year, //
+                'lang' => $this->lang, //
+                'status' => $this->status, //
+                'content' => $this->content, //
                 'episode' => MediaEpisodeResource::collection($this->withEpisode) //
             ];
         }

@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MediaConditionalController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MediaSharpnessController;
 use App\Http\Controllers\MusicController;
@@ -34,6 +36,10 @@ Route::prefix('music')->group(function () {
 });
 
 Route::prefix('media')->group(function () {
+    Route::prefix('conditional')->group(function () {
+        Route::get('index', [MediaConditionalController::class, 'index']);
+    });
+
     Route::get('/index', [MediaController::class, 'index']);
     Route::get('/show', [MediaController::class, 'show']);
     Route::prefix('sharpness')->group(function () {
@@ -43,20 +49,8 @@ Route::prefix('media')->group(function () {
 
 Route::post('/xml2json', [XmlController::class, 'xml2json']);
 
-Route::get('/test', function (Request $request) {
-//    $jwt = new \App\Services\JsonWebToken();
-//    return $jwt->createToken();
-
-    var_dump($request->ip());
-
-    var_dump(getenv('X-Forwarded-Proto'));
-
-    var_dump(getenv('X-Forwarded-For'));
-    var_dump($_SERVER);
-
-    // ip => $_SERVER['HTTP_X_FORWARDED_FOR']
-
-    exit();
+Route::get('/test', function () {
+    dd(DB::table('media_copy2')->where(['origin_id' => trim(123), 'origin' => '欧乐影院'])->value('id'));
 });
 
-Route::post('/test1',  [UserController::class, 'test']);
+Route::post('/test1', [UserController::class, 'test']);

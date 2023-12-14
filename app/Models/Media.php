@@ -15,20 +15,21 @@ class Media extends Model
 
     public $timestamps = false;
 
-    /**
-     * 模型的「引导」方法。
-     */
+    // 加载全局作用域
+
     protected static function booted()
     {
         static::addGlobalScope(new AncientScope());
     }
+
+    // 局部作用域
 
     /**
      * 只查询【未删除】的作用域
      */
     public function scopeNotDeleted(Builder $query): void
     {
-        $query->where(['deleted_flag' => 0]);
+        $query->where(['del_flag' => 0]);
     }
 
     /**
@@ -41,12 +42,35 @@ class Media extends Model
         }
     }
 
+    public function scopeArea(Builder $query, int $area_id): void
+    {
+        if (0 != $area_id) {
+            $query->where(['area_id' => $area_id]);
+        }
+    }
+
     public function scopeYear(Builder $query, int $year): void
     {
         if (0 != $year) {
             $query->where(['year' => $year]);
         }
     }
+
+    public function scopeTypeId(Builder $query, int $type_id): void
+    {
+        if (0 != $type_id) {
+            $query->where(['type_id' => $type_id]);
+        }
+    }
+
+    public function scopeName(Builder $query, $name): void
+    {
+        if (null != $name) {
+            $query->where('name', 'LIKE', '%' . $name . '%');
+        }
+    }
+
+    // 关联
 
     public function withEpisode()
     {

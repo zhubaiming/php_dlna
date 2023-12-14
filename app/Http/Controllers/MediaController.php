@@ -22,7 +22,15 @@ class MediaController extends Controller
             $this->setLimit($input);
         });
 
-        $data = new MediaCollection(Media::cateId($request->query('cate_id'))->year($request->query('year_id'))->notDeleted()->simplePaginate(...$this->getPageArray()));
+        $input = $request->input();
+
+        $data = new MediaCollection(Media::cateId($input['cate_id'])
+            ->area($input['area_id'])
+            ->year($input['year'])
+            ->typeId($input['type_id'])
+            ->name($input['search_key_word'] ?? null)
+            ->notDeleted()
+            ->simplePaginate(...$this->getPageArray()));
 
         return response()->json([
             'code' => 200,
