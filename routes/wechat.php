@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
@@ -22,17 +20,6 @@ use App\Http\Controllers\XmlController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::get('/test', function () {
-    dd(DB::table('media_copy2')->where(['origin_id' => trim(123), 'origin' => '欧乐影院'])->value('id'));
-});
-
-Route::post('/test1', [UserController::class, 'test']);
-
-
 Route::prefix('v1')->group(function () {
     Route::prefix('user')->controller(UserController::class)->group(function () {
         Route::post('sendVerificationCode', 'sendVerificationCode');
@@ -51,3 +38,10 @@ Route::prefix('v1')->group(function () {
         });
     });
 });
+
+
+Route::prefix('music')->group(function () {
+    Route::post('/index', [MusicController::class, 'index']);
+});
+
+Route::post('/xml2json', [XmlController::class, 'xml2json']);
