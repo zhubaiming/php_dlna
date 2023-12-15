@@ -15,17 +15,15 @@ class UserController extends Controller
 {
     public function sendVerificationCode(Request $request)
     {
-        if ('production' === config('app.env')) {
-            $input = $request->input();
+        $input = $request->input();
 
-            $code = mt_rand(100000, 999999);
+        $code = mt_rand(100000, 999999);
 
-            $message = new Message('aliyun');
+        $message = new Message('aliyun');
 
-            $message->sendMsg('toLogin', [$input['prefix'] . $input['phoneNumber'], $code]);
+        $message->sendMsg('toLogin', [$input['prefix'] . $input['phoneNumber'], $code]);
 
-            Redis::hSet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'], $code);
-        }
+        Redis::hSet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'], $code);
 
         return response()->json([
             'code' => 200,
@@ -36,97 +34,88 @@ class UserController extends Controller
 
     public function validateVerificationCode(Request $request, MiniApp $miniApp)
     {
-        if ('production' === config('app.env')) {
-            $input = $request->input();
+        $input = $request->input();
 
-            if ($code = Redis::hGet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'])) {
-                if ($code === $input['verificationCode']) {
-                    Redis::hDel('weixin_login_sms', $input['prefix'] . $input['phoneNumber']);
+        if ($code = Redis::hGet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'])) {
+            if ($code === $input['verificationCode']) {
+                Redis::hDel('weixin_login_sms', $input['prefix'] . $input['phoneNumber']);
 
-                    $time = time();
-                    $now = date('Y-m-d H:i:s', $time);
+                $time = time();
+                $now = date('Y-m-d H:i:s', $time);
 
-                    $wx_session = $miniApp->jscodeToSession($input['wxLoginCode']);
+                $wx_session = $miniApp->jscodeToSession($input['wxLoginCode']);
 
-                    try {
-                        $user = User::where(['country_code' => $input['prefix'], 'pure_phone_number' => $input['phoneNumber']])->firstOrFail();
+                try {
+                    $user = User::where(['country_code' => $input['prefix'], 'pure_phone_number' => $input['phoneNumber']])->firstOrFail();
 
-                        $user->last_login_at = $now;
-                        $user->last_login_ip = $request->ip();
+                    $user->last_login_at = $now;
+                    $user->last_login_ip = $request->ip();
 
-                        $user->wechat_openid = $wx_session['openid'];
-                        $user->wechat_unionid = $wx_session['unionid'] ?? null;
+                    $user->wechat_openid = $wx_session['openid'];
+                    $user->wechat_unionid = $wx_session['unionid'] ?? null;
 
-                        $user->wechat_SDK_version = $input['systemInfo']['SDKVersion'] ?? $user->wechat_SDK_version;
-                        $user->wechat_language = $input['systemInfo']['language'] ?? $user->wechat_language;
-                        $user->wechat_version = $input['systemInfo']['version'] ?? $user->wechat_version;
-                        $user->device_model = $input['systemInfo']['model'] ?? $user->device_model;
-                        $user->device_system = $input['systemInfo']['system'] ?? $user->device_system;
+                    $user->wechat_SDK_version = $input['systemInfo']['SDKVersion'] ?? $user->wechat_SDK_version;
+                    $user->wechat_language = $input['systemInfo']['language'] ?? $user->wechat_language;
+                    $user->wechat_version = $input['systemInfo']['version'] ?? $user->wechat_version;
+                    $user->device_model = $input['systemInfo']['model'] ?? $user->device_model;
+                    $user->device_system = $input['systemInfo']['system'] ?? $user->device_system;
 
-                        $user->save();
-                    } catch (ModelNotFoundException $e) {
-                        $id = DB::table('user_infos')->insertGetId([
-                            'country_code' => $input['prefix'],
-                            'pure_phone_number' => $input['phoneNumber'],
-                            'origin' => '微信小程序',
-                            'appId' => 'wx3c1e42206a0ecabd',
-                            'wechat_openid' => $wx_session['openid'],
-                            'wechat_unionid' => $wx_session['unionid'] ?? null,
-                            'wechat_SDK_version' => $input['systemInfo']['SDKVersion'] ?? null,
-                            'wechat_language' => $input['systemInfo']['language'] ?? null,
-                            'wechat_version' => $input['systemInfo']['version'] ?? null,
-                            'device_model' => $input['systemInfo']['model'] ?? null,
-                            'device_system' => $input['systemInfo']['system'] ?? null,
-                            'sing_in_at' => $now,
-                            'last_login_at' => $now,
-                            'last_login_ip' => $request->ip()
-                        ]);
-
-                        $user = User::find($id);
-                    }
-
-                    $token = JsonWebToken::getToken([
-                        'iss' => env('WX_MINIAPP_APP_ID'),
-                        'iat' => $time,
-                        'exp' => $time + 7200,
-//                    'nbf' => $time + 60,
-                        'sub' => config('app.url'),
-                        'aud' => '',
-                        'jti' => md5($user->origin . $user->wechat_openid . $user->device_model),
-                        'id' => $user->id
+                    $user->save();
+                } catch (ModelNotFoundException $e) {
+                    $id = DB::table('user_infos')->insertGetId([
+                        'country_code' => $input['prefix'],
+                        'pure_phone_number' => $input['phoneNumber'],
+                        'origin' => '微信小程序',
+                        'appId' => 'wx3c1e42206a0ecabd',
+                        'wechat_openid' => $wx_session['openid'],
+                        'wechat_unionid' => $wx_session['unionid'] ?? null,
+                        'wechat_SDK_version' => $input['systemInfo']['SDKVersion'] ?? null,
+                        'wechat_language' => $input['systemInfo']['language'] ?? null,
+                        'wechat_version' => $input['systemInfo']['version'] ?? null,
+                        'device_model' => $input['systemInfo']['model'] ?? null,
+                        'device_system' => $input['systemInfo']['system'] ?? null,
+                        'sing_in_at' => $now,
+                        'last_login_at' => $now,
+                        'last_login_ip' => $request->ip()
                     ]);
 
-                    Redis::set('User_login_' . $user->id, $user->toJson());
-
-                    return response()->json([
-                        'code' => 200,
-                        'message' => 'ok',
-                        'data' => [
-                            'token' => $token
-                        ]
-                    ]);
-                } else {
-                    return response()->json([
-                        'code' => 1003,
-                        'message' => '验证码错误，请重新输入',
-                        'data' => []
-                    ]);
+                    $user = User::find($id);
                 }
+
+                $token = JsonWebToken::getToken([
+                    'iss' => env('WX_MINIAPP_APP_ID'),
+                    'iat' => $time,
+                    'exp' => $time + 7200,
+//                    'nbf' => $time + 60,
+                    'sub' => config('app.url'),
+                    'aud' => '',
+                    'jti' => md5($user->origin . $user->wechat_openid . $user->device_model),
+                    'id' => $user->id
+                ]);
+
+                Redis::set('User_login_' . $user->id, $user->toJson());
+
+                return response()->json([
+                    'code' => 200,
+                    'message' => 'ok',
+                    'data' => [
+                        'token' => $token
+                    ]
+                ]);
             } else {
                 return response()->json([
-                    'code' => 1002,
-                    'message' => '验证码已过期，请重新获取',
+                    'code' => 1003,
+                    'message' => '验证码错误，请重新输入',
                     'data' => []
                 ]);
             }
+        } else {
+            return response()->json([
+                'code' => 1002,
+                'message' => '验证码已过期，请重新获取',
+                'data' => []
+            ]);
         }
 
-        return response()->json([
-            'code' => 200,
-            'message' => 'ok',
-            'data' => [
-                'token' => config('app.env')
-            ]
-        ]);
     }
 }
