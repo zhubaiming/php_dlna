@@ -64,6 +64,12 @@ return [
 //            'path' => storage_path('logs/dev/dev' . date('Y-m-d') . '.log'),
             'replace_placeholders' => true,
         ],
+        // 爬虫日志记录
+        'replite' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/replite/' . date('Y-m-d') . '.log'),
+            'replace_placeholders' => true,
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

@@ -23,6 +23,7 @@ class MediaController extends Controller
         });
 
         $input = $request->input();
+        $request->merge(['func' => 'index']);
 
         $data = new MediaCollection(Media::cateId($input['cate_id'])
             ->area($input['area_id'])
@@ -32,11 +33,7 @@ class MediaController extends Controller
             ->notDeleted()
             ->simplePaginate(...$this->getPageArray()));
 
-        return response()->json([
-            'code' => 200,
-            'message' => 'ok',
-            'data' => $data
-        ]);
+        return $data->items();
     }
 
     /**

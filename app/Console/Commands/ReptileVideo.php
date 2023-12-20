@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Reptile\NewOlevod;
 use App\Services\Reptile\Olevod;
 use Illuminate\Console\Command;
 
@@ -14,8 +15,11 @@ class ReptileVideo extends Command
      */
     protected $signature = 'reptile:video
      {resource : 数据来源网站}
-     {type : 视频类型}
-     {year : 视频年份}';
+     {type? : 视频类型}
+     {year? : 视频年份}
+     {fenlei? : 视频分类}
+     {lang? : 视频语言}
+     {endPage=50 : 结束页码}';
 
     /**
      * The console command description.
@@ -35,8 +39,11 @@ class ReptileVideo extends Command
             case '欧乐影院':
                 $class = new Olevod();
                 break;
+            case '新欧乐影院':
+                $class = new NewOlevod();
+                break;
         }
 
-        $class->beginRep($this->argument('type'), $this->argument('year'));
+        $class->beginRep();
     }
 }

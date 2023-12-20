@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SourcesArea;
-use App\Models\SourcesCate;
+use App\Http\Resources\wechatMiniApp\MediaConditionalCollection;
+use App\Models\MediaCate;
 use Illuminate\Http\Request;
 
 class MediaConditionalController extends Controller
@@ -13,20 +13,11 @@ class MediaConditionalController extends Controller
      */
     public function index()
     {
-        $years = [];
-        for ($i = (int)date('Y'); $i > 1999; $i--) {
-            array_push($years, ['id' => $i, 'name' => (string)$i]);
-        }
+        $data = new MediaConditionalCollection(MediaCate::with(['withChildren'])->where(['pid' => 0])->get());
 
-        return response()->json([
-            'code' => 200,
-            'message' => 'ok',
-            'data' => [
-                'years' => $years,
-                'areas' => SourcesArea::get(),
-                'cates' => SourcesCate::cate()->with(['withType'])->get()
-            ]
-        ]);
+        $data = $data->groupBy('type');
+
+        return $data;
     }
 
     /**

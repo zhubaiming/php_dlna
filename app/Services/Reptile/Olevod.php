@@ -23,6 +23,94 @@ class Olevod extends Base
         return '3';
     }
 
+    private function getTypeNum($id, $type_name)
+    {
+        if ('1' === $id) {
+            switch ($type_name) {
+                case '动作片':
+                    $id = 101;
+                    break;
+                case '喜剧片':
+                    $id = 102;
+                    break;
+                case '爱情片':
+                    $id = 103;
+                    break;
+                case '科幻片':
+                    $id = 104;
+                    break;
+                case '恐怖片':
+                    $id = 105;
+                    break;
+                case '剧情片':
+                    $id = 106;
+                    break;
+                case '战争片':
+                    $id = 107;
+                    break;
+                case '动画片':
+                    $id = 108;
+                    break;
+                case '悬疑片':
+                    $id = 109;
+                    break;
+                case '惊悚片':
+                    $id = 110;
+                    break;
+                case '纪录片':
+                    $id = 111;
+                    break;
+                case '奇幻片':
+                    $id = 112;
+                    break;
+                case '犯罪片':
+                    $id = 113;
+                    break;
+                default:
+                    break;
+            }
+        } elseif ('2' === $id) {
+            switch ($type_name) {
+                case '国产剧':
+                    $id = 202;
+                    break;
+                case '欧美剧':
+                    $id = 201;
+                    break;
+                case '港台剧':
+                    $id = 203;
+                    break;
+                case '日韩剧':
+                    $id = 204;
+                    break;
+                default:
+                    break;
+            }
+        } elseif ('3' === $id) {
+            switch ($type_name) {
+                case '真人秀':
+                    $id = 305;
+                    break;
+                case '音乐':
+                    $id = 302;
+                    break;
+                case '搞笑':
+                    $id = 304;
+                    break;
+                case '家庭':
+                    $id = 301;
+                    break;
+                case '曲艺':
+                    $id = 303;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return $id;
+    }
+
     private function setUrl($arr, $path = '')
     {
         $url = $this->baseUrl . $path;
@@ -36,12 +124,14 @@ class Olevod extends Base
         return $url;
     }
 
-    private function getList($id, $year)
+//    private function getList($id, $year, $lang, $type_name, $cate_id, $endPage)
+    private function getList($id, $year, $cate_id)
     {
-        for ($i = 0; $i < 30; $i++) {
+        for ($i = 30; $i > 0; $i--) {
             $url = $this->setUrl([
                 'id' => $id,
-                'page' => $i + 1,
+//                'lang' => $lang,
+                'page' => $i,
                 'year' => $year
             ], '/index.php/vod/show');
 
@@ -57,28 +147,25 @@ class Olevod extends Base
             $results = $xpath->query('//a[@class="vodlist_thumb lazyload"]');
 
             if (0 === $results->length) {
-                break;
+                sleep(mt_rand(2, 4));
+                continue;
             }
 
             $list = [];
             foreach ($results as $key => $value) {
-//                $list[$i * $results->length + $key]['url'] = $this->baseUrl . trim($value->getAttribute('href'));
-//                $list[$i * $results->length + $key]['id'] = trim($value->getAttribute('dids'));
                 $list[$key]['url'] = $this->baseUrl . trim($value->getAttribute('href'));
                 $list[$key]['id'] = trim($value->getAttribute('dids'));
             }
 
-            sleep(mt_rand(3, 6));
+            sleep(mt_rand(2, 4));
 
-//            var_dump($list);
-
-            $this->getEpisodeList($list);
+//            $this->getEpisodeList(array_reverse($list), $lang, $type_name, $cate_id);
+            $this->getEpisodeList(array_reverse($list), $cate_id);
         }
-
-//        return $list;
     }
 
-    private function getEpisodeList($lists)
+//    private function getEpisodeList($lists, $lang, $type_name, $cate_id)
+    private function getEpisodeList($lists, $cate_id)
     {
         foreach ($lists as $list) {
             $res = [];
@@ -102,6 +189,8 @@ class Olevod extends Base
             $res['area'] = trim($results[2]->nextSibling->nodeValue);
             $res['class'] = trim($results[3]->nextSibling->nodeValue);
 
+//            $res['lang'] = $lang;
+//            $res['type_name'] = $type_name;
 
             $res['status'] = $xpath->query('//span[@class="data_style"]')[0]->nodeValue;
 
@@ -135,11 +224,11 @@ class Olevod extends Base
             }
 
             $res['source'] = '欧乐影院';
-            $res['cate_id'] = 5;
+            $res['cate_id'] = $cate_id;
+            $res['source_id'] = $list['id'];
 
-            var_dump($res['name']);
+            echo $res['name'];
 
-            $media_id = $this->insertMedia($res);
 
             Log::info('==================================================');
             Log::info(json_encode($res, 256 + 64 + 32) . "\n");
@@ -147,6 +236,9 @@ class Olevod extends Base
             $url_list = [];
             for ($i = 1; $i < 101; $i++) {
                 $results = $xpath->query('//a[@class="' . $list['id'] . $i . '"]');
+                if (0 === $results->length) {
+                    break;
+                }
                 foreach ($results as $result) {
                     $url_list[$i - 1]['episode_name'] = trim($result->nodeValue);
                     $url_list[$i - 1]['url'] = $this->baseUrl . trim($result->getAttribute('href'));
@@ -154,13 +246,18 @@ class Olevod extends Base
             }
             array_unique($url_list, SORT_REGULAR);
 
-            sleep(mt_rand(3, 6));
+            sleep(mt_rand(2, 4));
+
+            $media_id = $this->insertMedia($res, count($url_list));
+
+            if (0 === $media_id) {
+                echo ' - 无需更新' . PHP_EOL;
+                continue;
+            }
+            echo PHP_EOL;
 
             $this->getPlayUrl($url_list, $media_id);
         }
-
-//        var_dump($list['url']);
-
     }
 
     private function getPlayUrl($lists, $media_id)
@@ -168,8 +265,9 @@ class Olevod extends Base
         $res = [];
 
         foreach ($lists as $key => $list) {
-//            var_dump($list['url']);
             $html = $this->getHtmlContent($list['url']);
+
+            if (0 === mb_strlen($html)) $this->getPlayUrl($lists, $media_id);
 
             $document = new \DOMDocument();
             libxml_use_internal_errors(true);
@@ -181,12 +279,6 @@ class Olevod extends Base
 
             $play_url = null;
             foreach ($results as $result) {
-//                if ($str = stristr($result->nodeValue, 'player_aaaa =')) {
-//                    $str = mb_substr($str, mb_strlen('player_aaaa ='));
-//
-//                    $play_url = json_decode($str, true);
-//                }
-
                 if ($str = stristr($result->nodeValue, 'player_aaaa=')) {
                     $str = mb_substr($str, mb_strlen('player_aaaa='));
 
@@ -194,12 +286,9 @@ class Olevod extends Base
                 }
             }
 
-//            var_dump($play_url);
-
             $res[$key]['media_id'] = $media_id;
             $res[$key]['episode_id'] = $this->insertMediaEpisode($list, $media_id);
             $res[$key]['sharpness_id'] = $this->insertMediaSharpness($media_id, '高清');
-//            $res[$key]['sharpness_id'] = $this->getMediaSharpness($play_url['url'], $media_id);
             $res[$key]['url'] = $play_url['url'];
 
             $this->insertMediaUrls($res[$key]);
@@ -207,7 +296,7 @@ class Olevod extends Base
             Log::info(json_encode($list, 256 + 64 + 32) . "\n");
             Log::info(json_encode($res[$key], 256 + 64 + 32) . "\n");
 
-            sleep(mt_rand(3, 6));
+            sleep(mt_rand(2, 4));
         }
     }
 
@@ -221,22 +310,30 @@ class Olevod extends Base
         return $this->insertMediaSharpness($media_id, '高清');
     }
 
+//    public function beginRep($type, $year, $type_name, $lang, $endPage)
     public function beginRep($type, $year)
     {
         $id = '0';
+        $cate_id = 0;
         switch ($type) {
             case 'dy':
                 $id = $this->dy();
+                $cate_id = 4;
                 break;
             case 'dsj':
                 $id = $this->dsj();
+                $cate_id = 5;
                 break;
             case 'zy':
                 $id = $this->zy();
+                $cate_id = 6;
                 break;
         }
 
-        $this->getList($id, $year);
+//        $id = $this->getTypeNum($id, $type_name);
+//
+//        $this->getList($id, $year, $lang, $type_name, $cate_id, $endPage);
+        $this->getList($id, $year, $cate_id);
 
         exit(0);
     }

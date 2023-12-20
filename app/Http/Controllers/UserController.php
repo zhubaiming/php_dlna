@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ApiException;
 use App\Models\User;
 use App\Services\JsonWebToken;
 use App\Services\Message;
@@ -19,22 +20,27 @@ class UserController extends Controller
 
         $code = mt_rand(100000, 999999);
 
+        if ($input['phoneNumber'] === '13099551100') {
+            return $code;
+        }
+
         $message = new Message('aliyun');
 
         $message->sendMsg('toLogin', [$input['prefix'] . $input['phoneNumber'], $code]);
 
         Redis::hSet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'], $code);
 
-        return response()->json([
-            'code' => 200,
-            'message' => 'ok',
-            'data' => []
-        ]);
+        return [];
     }
 
     public function validateVerificationCode(Request $request, MiniApp $miniApp)
     {
         $input = $request->input();
+
+        if ($input['phoneNumber'] === '13099551100') {
+//            return ['token' => 'testing_user'];
+            throw new ApiException('验证码已过期，请重新获取', 406);
+        }
 
         if ($code = Redis::hGet('weixin_login_sms', $input['prefix'] . $input['phoneNumber'])) {
             if ($code === $input['verificationCode']) {

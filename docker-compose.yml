@@ -23,3 +23,24 @@ services:
         restart: always
         volumes:
             - ./:/var/www/html
+
+    repltile_1:
+        container_name: php_repltile_1
+        image: php:yuanjiyun_php_fpm_dev
+        restart: always
+        volumes:
+            - ./:/var/www/html
+
+    repltile_2:
+        container_name: php_repltile_2
+        image: php:yuanjiyun_php_fpm_dev
+        restart: always
+        volumes:
+            - ./:/var/www/html
+
+    repltile_3:
+        container_name: php_repltile_3
+        image: php:yuanjiyun_php_fpm_dev
+        restart: always
+        volumes:
+            - ./:/var/www/html

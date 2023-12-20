@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Base
 {
@@ -33,6 +34,20 @@ class Base
                 'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             ])->connectTimeout(180)->timeout(60)->retry(3, 180)->get($url);
 
+
+            //Accept:
+            //application/json, text/plain, */*
+
+
+            //Sec-Fetch-Dest:
+            //empty
+            //Sec-Fetch-Mode:
+            //cors
+            //Sec-Fetch-Site:
+            //cross-site
+            //User-Agent:
+            //Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+
             if ($response->successful()) {
                 return $response->body();
             } else {
@@ -43,24 +58,76 @@ class Base
         }
     }
 
-    protected function insertMedia($data)
+    protected function getJsonContent($url)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json, text/plain, */*',
+                'Accept-Encoding' => 'gzip, deflate, br',
+                'Accept-Language' => 'zh-CN,zh;q=0.9',
+                'Dnt' => '1',
+                'Sec-Ch-Ua' => '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                'Sec-Ch-Ua-Mobile' => '?0',
+                'Sec-Ch-Ua-Platform' => '"macOS"',
+                'Sec-Fetch-Dest' => 'empty',
+                'Sec-Fetch-Mode' => 'cors',
+                'Sec-Fetch-Site' => 'cross-site',
+                'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            ])->connectTimeout(180)->timeout(60)->retry(3, 180)->get($url);
+
+            if ($response->successful()) {
+                $body = $response->body();
+                $result = json_decode($body, true);
+                return $result['data'];
+            } else {
+                echo "\033[1;35m获取未成功: 查看replite下的http日志\033[0m" . PHP_EOL;
+
+                Log::build([
+                    'driver' => 'single',
+                    'path' => storage_path('logs/replite/http.log')
+                ])->warning($response->status() . ': ' . $response->body());
+
+                $this->getJsonContent($url);
+            }
+        } catch (ConnectionException $e) {
+            echo "\033[1;31m连接未成功: 查看replite下的http日志\033[0m" . PHP_EOL;
+
+            Log::build([
+                'driver' => 'single',
+                'path' => storage_path('logs/replite/http.log')
+            ])->error($e->getCode() . ': ' . $e->getMessage());
+
+            $this->getJsonContent($url);
+        }
+    }
+
+    protected function insertMedia($data, $count)
     {
         date_default_timezone_set("PRC");//这里是添加的时区函数
 
         try {
             $media = Media::where(['name' => $data['name']])->firstOrFail();
 
-            $media->status = $data['status'];
-            $media->cate_id = $data['cate_id'];
-            $media->cover_pic = $data['cover_pic'];
-            $media->area = $data['area'];
-            $media->year = $data['year'];
-            $media->class = $data['class'];
-            $media->deleted_flag = 0;
+//            $media->lang = $data['lang'];
+//            $media->type_name = $data['type_name'];
+            $media->source_id = $data['source_id'];
             $media->updated_at = date('Y-m-d H:i:s');
-            $media->save();
 
-            return $media->id;
+            if ($data['status'] === $media->status) {
+                $media->save();
+
+                if ($count === MediaUrl::where(['media_id' => $media->id])->count()) {
+                    return 0;
+                } else {
+                    return $media->id;
+                }
+            } else {
+                $media->status = $data['status'];
+
+                $media->save();
+
+                return $media->id;
+            }
         } catch (ModelNotFoundException $e) {
             $id = DB::table('media')->insertGetId([
                 'cate_id' => $data['cate_id'] ?? null,
@@ -75,9 +142,10 @@ class Base
                 'class' => $data['class'] ?? null,
                 'type_name' => $data['type_name'] ?? null,
                 'source' => $data['source'] ?? null,
-                'version' => $data['version'] ?? null,
+                'source_id' => $data['source_id'] ?? null,
                 'status' => $data['status'] ?? null,
                 'blurb' => $data['blurb'] ?? null,
+                'updated_at' => date('Y-m-d H:i:s'),
                 'deleted_flag' => 0,
             ]);
 

@@ -20,22 +20,24 @@ use App\Http\Controllers\XmlController;
 |
 */
 
-Route::prefix('v1')->group(function () {
-    Route::prefix('user')->controller(UserController::class)->group(function () {
-        Route::post('sendVerificationCode', 'sendVerificationCode');
-        Route::post('validateVerificationCode', 'validateVerificationCode');
-    });
-
-    Route::prefix('media')->group(function () {
-        Route::prefix('conditional')->group(function () {
-            Route::get('index', [MediaConditionalController::class, 'index']);
+Route::middleware(['api'])->group(function () {
+    Route::prefix('v1')->group(function () {
+        Route::prefix('user')->controller(UserController::class)->group(function () {
+            Route::post('sendVerificationCode', 'sendVerificationCode');
+            Route::post('validateVerificationCode', 'validateVerificationCode');
         });
 
-        Route::get('/index', [MediaController::class, 'index']);
-        Route::get('/show', [MediaController::class, 'show']);
-        Route::prefix('sharpness')->group(function () {
-            Route::get('/index', [MediaSharpnessController::class, 'index']);
+//        Route::controller(MediaController::class)->group(function () {
+//            Route::resource('media', MediaController::class);
+//        });
+
+//
+        Route::prefix('media')->group(function () {
+            Route::resource('conditional', MediaConditionalController::class);
+            Route::resource('sharpness', MediaSharpnessController::class);
         });
+
+        Route::resource('media', MediaController::class);
     });
 });
 
