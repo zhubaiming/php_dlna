@@ -101,7 +101,7 @@ class NewOlevod extends Base
             $urls = [];
 
             if (!is_array($res['urls'])) {
-                return false;
+                $res['urls'] = [];
             }
 
             foreach ($res['urls'] as $url) {
