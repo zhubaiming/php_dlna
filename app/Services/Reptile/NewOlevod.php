@@ -89,6 +89,9 @@ class NewOlevod extends Base
     private function getDetail()
     {
         DB::table('new_olevod')->where(['is_update' => false])->orderBy('id', 'desc')->lazyById()->each(function (object $video) {
+
+            echo "\033[0;32m即将获取" . $video->name . "\033[0m" . PHP_EOL;
+
             $url = $this->base_api_url . '/detail/' . $video->id . '/true?_vv=' . $this->getVV();
 
             $res = $this->getJsonContent($url);

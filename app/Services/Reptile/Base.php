@@ -8,6 +8,7 @@ use App\Models\MediaSharpness;
 use App\Models\MediaUrl;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,8 @@ class Base
 
     protected function getJsonContent($url)
     {
+        $retryNum = 0;
+
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json, text/plain, */*',
@@ -75,29 +78,87 @@ class Base
                 'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             ])->connectTimeout(180)->timeout(60)->retry(3, 180)->get($url);
 
-            if ($response->successful()) {
-                $body = $response->body();
-                $result = json_decode($body, true);
-                return $result['data'];
-            } else {
-                echo "\033[1;35m获取未成功: 查看replite下的http日志\033[0m" . PHP_EOL;
+            if ($response->successful()) { // 2xx
+
+                if ($response->ok()) { // 200
+                    return $response['data'];
+                } elseif ($response->created()) { // 201
+                } elseif ($response->accepted()) { // 202
+                } elseif ($response->noContent()) { // 204
+                    return ['urls' => ['url' => '']];
+                }
+            } elseif ($response->clientError()) { // 4xx
+                if ($response->badRequest()) { // 400
+                } elseif ($response->unauthorized()) { // 401
+                } elseif ($response->paymentRequired()) { // 402
+                } elseif ($response->forbidden()) { // 403
+                    echo "\033[1;31m403错误: 查看replite下的http日志\033[0m" . PHP_EOL;
+
+                    Log::build([
+                        'driver' => 'single',
+                        'path' => storage_path('logs/replite/http' . date('Y-m-d') . '.log')
+                    ])->error('[serverError]' . $response->status() . ': ' . $response->body());
+
+                    // todo - 刷新cookie 重新请求
+                    return ['urls' => ['url' => '']];
+                } elseif ($response->notFound()) { // 404
+                    return ['urls' => ['url' => '']];
+                } elseif ($response->requestTimeout()) { // 408
+                } elseif ($response->conflict()) { // 409
+                } elseif ($response->unprocessableEntity()) { // 422
+                } elseif ($response->tooManyRequests()) { // 429
+                }
+            } elseif ($response->serverError()) { // 5xx
+                echo "\033[1;31m服务器错误: 查看replite下的http日志\033[0m" . PHP_EOL;
 
                 Log::build([
                     'driver' => 'single',
-                    'path' => storage_path('logs/replite/http.log')
-                ])->warning($response->status() . ': ' . $response->body());
+                    'path' => storage_path('logs/replite/http' . date('Y-m-d') . '.log')
+                ])->error('[serverError]' . $response->status() . ': ' . $response->body());
 
-                $this->getJsonContent($url);
+                return ['urls' => ['url' => '']];
             }
+
+//            if ($response->ok()) { // 200
+//            } elseif ($response->created()) { // 201
+//            } elseif ($response->accepted()) { // 202
+//            } elseif ($response->noContent()) { // 204
+//            } elseif ($response->movedPermanently()) { // 301
+//            } elseif ($response->found()) { // 302
+//            } elseif ($response->badRequest()) { // 400
+//            } elseif ($response->unauthorized()) { // 401
+//            } elseif ($response->paymentRequired()) { // 402
+//            } elseif ($response->forbidden()) { // 403
+//            } elseif ($response->notFound()) { // 404
+//            } elseif ($response->requestTimeout()) { // 408
+//            } elseif ($response->conflict()) { // 409
+//            } elseif ($response->unprocessableEntity()) { // 422
+//            } elseif ($response->tooManyRequests()) { // 429
+//            } elseif ($response->serverError()) { //500
+//            }
         } catch (ConnectionException $e) {
-            echo "\033[1;31m连接未成功: 查看replite下的http日志\033[0m" . PHP_EOL;
+            echo "\033[1;31m连接超时: 查看replite下的http日志\033[0m" . PHP_EOL;
 
             Log::build([
                 'driver' => 'single',
-                'path' => storage_path('logs/replite/http.log')
-            ])->error($e->getCode() . ': ' . $e->getMessage());
+                'path' => storage_path('logs/replite/http' . date('Y-m-d') . '.log')
+            ])->error('[Connect]' . $e->getCode() . ': ' . $e->getMessage());
 
+            if ($retryNum === 6) {
+                return ['urls' => ['url' => '']];
+            }
+
+            $retryNum += 3;
             $this->getJsonContent($url);
+        } catch (RequestException $e) {
+            echo "\033[1;31m请求失败: 查看replite下的http日志\033[0m" . PHP_EOL;
+
+            Log::build([
+                'driver' => 'single',
+                'path' => storage_path('logs/replite/http' . date('Y-m-d') . '.log')
+            ])->error('[Request]' . $e->getCode() . ': ' . $e->getMessage());
+
+            return ['urls' => ['url' => '']];
         }
     }
 
