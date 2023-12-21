@@ -15,6 +15,32 @@ use Illuminate\Support\Facades\Log;
 
 class Base
 {
+    private $proxyPorts = [
+        '29001', '29002', '29003', '29004', '29005', '62612', '62613',
+        '51901', '51902', '51903', '51904', '51905',
+        '50105', '50106',
+        '57016', '57026', '57037', '57046', '57077',
+        '62672',
+        '50112',
+        '62674',
+        '62531',
+        '62541',
+        '62671',
+        '62591',
+        '62551',
+        '62601',
+        '62602',
+        '62603',
+        '62604',
+        '62605',
+        '62606',
+        '62607',
+        '62608',
+        '62609',
+        '62610',
+        '62611'
+    ];
+
     protected function getHtmlContent($url)
     {
         try {
@@ -63,6 +89,8 @@ class Base
     {
         $retryNum = 0;
 
+//        $proxy = 'http://183.240.222.147:' . $this->proxyPorts[mt_rand(0, count($this->proxyPorts))];
+
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json, text/plain, */*',
@@ -76,7 +104,11 @@ class Base
                 'Sec-Fetch-Mode' => 'cors',
                 'Sec-Fetch-Site' => 'cross-site',
                 'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            ])->connectTimeout(180)->timeout(60)->retry(3, 180)->get($url);
+            ])->connectTimeout(180)->timeout(60)->retry(3, 180)
+//                ->withOptions([
+//                    'proxy' => $proxy
+//                ])
+                ->get($url);
 
             if ($response->successful()) { // 2xx
 
