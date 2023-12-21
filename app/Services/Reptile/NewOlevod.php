@@ -100,10 +100,8 @@ class NewOlevod extends Base
 
             $urls = [];
 
-            dd(array_key_exists('urls', $res));
-
-            if (!array_key_exists('urls', $res)) {
-                $res['urls'] = [];
+            if (!is_array($res['urls'])) {
+                return false;
             }
 
             foreach ($res['urls'] as $url) {
