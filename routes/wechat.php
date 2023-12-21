@@ -8,6 +8,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MediaSharpnessController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\XmlController;
+use App\Http\Controllers\Api\MediaCateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,27 +22,33 @@ use App\Http\Controllers\XmlController;
 */
 
 Route::prefix('v1')->group(function () {
-    Route::prefix('user')->controller(UserController::class)->group(function () {
-        Route::post('sendVerificationCode', 'sendVerificationCode');
-        Route::post('validateVerificationCode', 'validateVerificationCode');
-    });
-
     Route::prefix('media')->group(function () {
-        Route::prefix('conditional')->group(function () {
-            Route::get('index', [MediaConditionalController::class, 'index']);
-        });
-
-        Route::get('/index', [MediaController::class, 'index']);
-        Route::get('/show', [MediaController::class, 'show']);
-        Route::prefix('sharpness')->group(function () {
-            Route::get('/index', [MediaSharpnessController::class, 'index']);
-        });
+        Route::apiResource('conditional', MediaCateController::class);
     });
 });
 
-
-Route::prefix('music')->group(function () {
-    Route::post('/index', [MusicController::class, 'index']);
-});
-
-Route::post('/xml2json', [XmlController::class, 'xml2json']);
+//Route::prefix('v1')->group(function () {
+//    Route::prefix('user')->controller(UserController::class)->group(function () {
+//        Route::post('sendVerificationCode', 'sendVerificationCode');
+//        Route::post('validateVerificationCode', 'validateVerificationCode');
+//    });
+//
+//    Route::prefix('media')->group(function () {
+//        Route::prefix('conditional')->group(function () {
+//            Route::get('index', [MediaConditionalController::class, 'index']);
+//        });
+//
+//        Route::get('/index', [MediaController::class, 'index']);
+//        Route::get('/show', [MediaController::class, 'show']);
+//        Route::prefix('sharpness')->group(function () {
+//            Route::get('/index', [MediaSharpnessController::class, 'index']);
+//        });
+//    });
+//});
+//
+//
+//Route::prefix('music')->group(function () {
+//    Route::post('/index', [MusicController::class, 'index']);
+//});
+//
+//Route::post('/xml2json', [XmlController::class, 'xml2json']);
