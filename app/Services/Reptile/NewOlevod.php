@@ -94,6 +94,8 @@ class NewOlevod extends Base
 
             $url = $this->base_api_url . '/detail/' . $video->id . '/true?_vv=' . $this->getVV();
 
+            echo $url . PHP_EOL;
+
             $res = $this->getJsonContent($url);
 
             $urls = [];
