@@ -31,4 +31,19 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'wechat' => [
+        'mini_app' => [
+            'app_id' => env('WX_MINIAPP_APP_ID'),
+            'app_secret' => env('WX_MINIAPP_APP_SECRET'),
+        ],
+    ],
+
+    'aliyun' => [
+        'accesskey_id' => env('ALY_ACCESSKEY_ID'),
+        'accesskey_secret' => env('ALY_ACCESSKEY_SECRET'),
+        'dysms' => [
+            'sign_name' => env('ALY_DYSMS_SIGN_NAME'),
+            'template_code' => env('ALY_DYSMS_TEMPLATE_CODE'),
+        ]
+    ]
 ];
