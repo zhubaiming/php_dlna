@@ -9,7 +9,7 @@ class Controller extends BaseController
 {
     use ApiResponse;
 
-    protected $validateSafeAll = [];
+    protected array $validateSafeAll = [];
 
     protected $validateErrorMessage;
 }
