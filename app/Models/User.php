@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserEnum;
+use App\Services\JsonWebToken;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,7 +14,49 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'user_infos';
+    /**
+     * 该表将与模型关联
+     *
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
+     * 与表关联的主键
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * 自增ID的数据类型
+     *
+     * @var string
+     */
+    protected $keyType = 'int';
+
+    /**
+     * 是否主动维护时间戳
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
+     * 设置当前模型使用的数据库连接名
+     *
+     * @var string
+     */
+//    protected $connection = '';
+
+    /**
+     * 默认属性值
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => UserEnum::USER_NORMAL
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -36,6 +80,7 @@ class User extends Authenticatable
         'invitation_code',
     ];
 
+
 //    /**
 //     * The attributes that should be hidden for serialization.
 //     *
@@ -57,12 +102,13 @@ class User extends Authenticatable
 //    ];
 
     /**
-     * 指示模型是否主动维护时间戳。
-     *
-     * @var bool
+     * 定义存储时间戳的字段名
      */
-//    public $timestamps = false;
+//    const CREATED_AT = 'sing_in_at';
+//    const UPDATED_AT = 'last_login_at';
 
-    const CREATED_AT = 'sing_in_at';
-    const UPDATED_AT = 'last_login_at';
+    public function getJWTIdentifier()
+    {
+        return JsonWebToken::getToken($this);
+    }
 }
