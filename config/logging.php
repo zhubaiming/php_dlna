@@ -64,6 +64,13 @@ return [
 //            'path' => storage_path('logs/dev/dev' . date('Y-m-d') . '.log'),
             'replace_placeholders' => true,
         ],
+        'wechatApi' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/wechatApi/' . date('Y-m-d') . '.log'),
+            'bubble' => false,
+            'permission' => 0755,
+            'locking' => true
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],
