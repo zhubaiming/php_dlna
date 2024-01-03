@@ -14,11 +14,13 @@ trait WechatTrait
             return $this->failed($this->validateErrorMessage, HttpCode::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $credentials = $this->convertDataFormat();
+
         if (
-            Auth::guard('wechat')->attempt(['country_code' => $this->validateSafeAll['prefix'], 'pure_phone_number' => $this->validateSafeAll['phoneNumber'], 'verificationCode' => $this->validateSafeAll['verificationCode']]) ||
-            Auth::guard('wechat')->register($this->validateSafeAll)
+            Auth::guard('wechat')->attempt($credentials) ||
+            Auth::guard('wechat')->register($credentials)
         ) {
-            return $this->success(Auth::guard('wechat')->user()->token);
+            return $this->success(Auth::guard('wechat')->user()->last_token);
         } else {
             return $this->failed('用户登录失败', HttpCode::HTTP_UNAUTHORIZED);
         }
@@ -48,13 +50,29 @@ trait WechatTrait
             'systemInfo.required' => '系统信息必须填写',
         ]);
 
-
         if ($validator->stopOnFirstFailure()->fails()) {
             $this->validateErrorMessage = $validator->errors();
             return false;
         } else {
-            $this->validateSafeAll = $validator->validated();
+            $this->validateSafeAll = array_merge($this->validateSafeAll, $validator->validated());
             return true;
         }
+    }
+
+    private function convertDataFormat(): array
+    {
+        return [
+            'verificationCode' => $this->validateSafeAll['verificationCode'],
+            'country_code' => $this->validateSafeAll['prefix'],
+            'pure_phone_number' => $this->validateSafeAll['phoneNumber'],
+            'wxLoginCode' => $this->validateSafeAll['wxLoginCode'],
+            'app_id' => config('services.wechat.mini_app.app_id'),
+            'device_model' => $this->validateSafeAll['systemInfo']['model'] ?? null,
+            'device_system' => $this->validateSafeAll['systemInfo']['system'] ?? null,
+            'wechat_SDK_version' => $this->validateSafeAll['systemInfo']['SDKVersion'] ?? null,
+            'wechat_language' => $this->validateSafeAll['systemInfo']['language'] ?? null,
+            'wechat_version' => $this->validateSafeAll['systemInfo']['version'] ?? null,
+            'ip' => $this->validateSafeAll['ip']
+        ];
     }
 }
