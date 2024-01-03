@@ -20,16 +20,20 @@ class LogRegisteredUser
      */
     public function handle(Registered $event): void
     {
-        DB::table('user_level')->insert([
+        $event->user->save();
+
+        DB::table('log_user_levels')->insert([
             'user_id' => $event->user->user_id,
             'level' => 0,
-            'point' => 100
+            'point' => 100,
+            'point_total' => 100
         ]);
 
-        DB::table('log_user_point')->insert([
+        DB::table('log_user_point_infos')->insert([
             'user_id' => $event->user->user_id,
             'point' => 100,
-            'point_reasons' => '用户成功注册'
+            'point_reasons' => '用户成功注册',
+            'created_at' => date('Y-m-d H:i:s')
         ]);
     }
 }
