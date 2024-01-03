@@ -7,71 +7,117 @@ use Illuminate\Support\Facades\Response;
 
 trait ApiResponse
 {
-    protected $statusCode = HttpCode::HTTP_OK;
+    protected int $http_code = HttpCode::HTTP_OK;
 
-    public function getStatusCode()
+//    protected array $responseHeaders = [];
+//
+//
+//    public function notFound($message = 'Not Found!')
+//    {
+//        return $this->failed($message, HttpCode::HTTP_NOT_FOUND);
+//    }
+//
+//
+//    public function created($message = 'Created')
+//    {
+//        return $this->setStatusCode(HttpCode::HTTP_CREATED)->message($message);
+//    }
+
+    /**
+     * 响应成功的接口返回
+     *
+     * @param $data - 要返回的数据
+     * @param string $status - 返回提示
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function success($data, string $message = 'success'): \Illuminate\Http\JsonResponse // 成功返回数据
     {
-        return $this->statusCode;
+        return $this->status(compact('data'), $message); // compact() - 创建一个包含变量名和它们的值的数组
     }
 
-    public function setStatusCode($statusCode)
+    /**
+     * 响应失败的返回接口
+     *
+     * @param string $message
+     * @param int $code
+     * @param int $http_code
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function failed(string $message, int $code, int $http_code = HttpCode::HTTP_BAD_REQUEST): \Illuminate\Http\JsonResponse
     {
-        $this->statusCode = $statusCode;
-        return $this;
+        return $this->setHttpCode($http_code)->message($message, $code);
     }
 
-    public function respond($data, $header = [])
+    /**
+     * @param $message
+     * @param string $status
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function message($message, $code): \Illuminate\Http\JsonResponse
     {
-        return Response::json($data, $this->getStatusCode(), $header);
+        return $this->status(['message' => $message], $message, $code);
     }
 
-    public function status($status, array $data, $code = null)
+    /**
+     * @param string $message
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function internalError(string $message = 'Internal Server Error!'): \Illuminate\Http\JsonResponse
     {
-        if ($code) {
-            $this->setStatusCode($code);
+        return $this->failed($message, 999999, HttpCode::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * @param array $data
+     * @param $message
+     * @param int $code
+     * @param int|null $http_code
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function status(array $data, $message = null, int $code = 0, int $http_code = null): \Illuminate\Http\JsonResponse
+    {
+        if (!is_null($http_code)) {
+            $this->setHttpCode($http_code);
         }
 
         $status = [
-            'status' => $status,
-            'code' => $this->statusCode
+            'message' => $message,
+            'code' => $code
         ];
 
         $data = array_merge($status, $data);
         return $this->respond($data);
     }
 
-    public function failed($message, $code = HttpCode::BAD_REQUEST, $status = 'error')
+    /**
+     * @param $data
+     * @param array $header
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function respond($data, array $header = []): \Illuminate\Http\JsonResponse
     {
-        // return $this->status('error', [
-        //            'message' => $message,
-        //            'code' => $code
-        //        ]);
-
-        return $this->setStatusCode($code)->message($message, $status);
+        return Response::json($data, $this->getHttpCode(), $header);
     }
 
-    public function message($message, $status = 'success')
+    /**
+     * @param int $http_code
+     * @return $this
+     */
+    private function setHttpCode(int $http_code): static
     {
-        return $this->status($status, ['message' => $message]);
+        $this->http_code = $http_code;
+
+        return $this;
     }
 
-    public function internalError($message = 'Internal Server Error!')
+    /**
+     * @return mixed
+     */
+    private function getHttpCode(): mixed
     {
-        return $this->failed($message, HttpCode::SERVER_ERROR);
+        return $this->http_code;
     }
 
-    public function created($message = 'Created')
-    {
-        return $this->setStatusCode(HttpCode::CREATED)->message($message);
-    }
 
-    public function success($data, $status = 'success')
-    {
-        return $this->status($status, compact('data'));
-    }
-
-    public function notFound($message = 'Not Found!')
-    {
-        return $this->failed($message, HttpCode::NOT_FOUND);
-    }
 }
