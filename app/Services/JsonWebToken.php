@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+
 class JsonWebToken
 {
-    private static $header = [
+    private static array $header = [
         'alg' => 'SH256', // 生成signature的算法
         'typ' => 'JWT'    // 类型
     ];
@@ -22,30 +24,70 @@ class JsonWebToken
      * 'jti' => ''  // JWT ID 编号 - 该Token唯一标识
      * ]
      *
-     * [
-     * 'iss'=>'jwt_admin', //该JWT的签发者
-     * 'iat'=>time(), //签发时间
-     * 'exp'=>time()+7200, //过期时间
-     * 'nbf'=>time()+60, //该时间之前不接收处理该Token
-     * 'sub'=>'www.mano100.cn', //面向的用户
-     * 'jti'=>md5(uniqid('JWT').time()) //该Token唯一标识
-     * ]
+     * https://juejin.cn/post/7059151598643052575
      *
      * @return false|string
      */
-    public static function getToken(array $payload)
+    public static function getToken(Authenticatable $user)
     {
-        if (is_array($payload)) {
-            $base64header = self::base64UrlEncode(json_encode(self::$header, JSON_UNESCAPED_UNICODE));
+        $base64header = self::base64UrlEncode(json_encode(self::$header, JSON_UNESCAPED_UNICODE));
 
-            $base64payload = self::base64UrlEncode(json_encode($payload, JSON_UNESCAPED_UNICODE));
+        $base64payload = self::base64UrlEncode(json_encode(self::setPayload($user), JSON_UNESCAPED_UNICODE));
 
-            $token = $base64header . '.' . $base64payload . '.' . self::signature($base64header . '.' . $base64payload, self::$header['alg']);
+        return $base64header . '.' . $base64payload . '.' . self::signature($base64header . '.' . $base64payload, self::$header['alg']);
+    }
 
-            return $token;
-        } else {
-            return false;
-        }
+    private static function setPayload($user): array
+    {
+        $time = time();
+
+        return [
+            'iss' => $user->app_id, // issuer 签发人 - 该JWT的签发者
+            'iat' => $time, // Issued At 签发时间 - 签发时间
+            'exp' => $time + 7200, // expiration time 过期时间 - 过期时间
+            'sub' => config('app.url'), // subject 主题 - 面向的用户
+            'aud' => '', // audience 受众
+            'nbf' => '', // Not Before 生效时间 - 该时间之前不接收处理该Token
+            'jti' => md5($user->id),  // JWT ID 编号 - 该Token唯一标识
+            'data' => [ // 自定义数据
+                '_id' => '',
+                'email' => '',
+                'password' => '',
+                'nickName' => '',
+                'role' => [
+                    '_id' => '',
+                    'name' => '',
+                    '__v' => '',
+                    'createdAt' => '',
+                    'access' => '',
+                ],
+                '__v' => 0,
+                'column' => '',
+                'description' => '',
+                'avatar' => '',
+                'createdAt' => '',
+                /**
+                 * 例子
+                 *
+                 * '_id': '5f2918ed59d0b03366c0f0ad,
+                 * 'email': '111@test.com',
+                 * 'password': '$2a$10NPgFsgNVtIz3hHI5kdalYouiZe73oyV7bVcnP6vh2CaLR8uASjaOm',
+                 * 'nickName': '废品回收',
+                 * 'role': [
+                 *   '_id': "5e60698bdb60f64b57e36133',
+                 *   'name': 'normalUser',
+                 *   '__v': 0.
+                 *   createdAt': '2020-08-04T08:14:37.470Z',
+                 *   'access': 'user'
+                 * ],
+                 * '__v': 0,
+                 * 'column': '5f4db92abb821789a5490ed3',
+                 * 'description': '这是废品回收的简介',
+                 * 'avatar': '6183ad52fc0f930997b02819',
+                 * 'createdAt': '2020-08-04T08:14:37.470Z'
+                 */
+            ],
+        ];
     }
 
     public static function verifyToken(string $Token)
