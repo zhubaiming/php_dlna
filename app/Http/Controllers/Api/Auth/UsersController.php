@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Api\Controller;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class UsersController extends Controller
 {
     use WechatTrait;
 
@@ -54,6 +54,8 @@ class UserController extends Controller
         if ($request->missing('origin')) return $this->failed('login missing origin');
 
         $loginMethod = strtolower($request->input('origin')) . 'Login';
+
+        $this->validateSafeAll['ip'] = $request->ip();
 
         if (method_exists($this, $loginMethod)) return $this->{$loginMethod}($request->input());
 
