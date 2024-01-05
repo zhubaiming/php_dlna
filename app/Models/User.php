@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -107,8 +108,62 @@ class User extends Authenticatable
 //    const CREATED_AT = 'sing_in_at';
 //    const UPDATED_AT = 'last_login_at';
 
-    public function getJWTIdentifier()
+//    public function getJWTIdentifier(self $user)
+//    {
+////        $this->jwt->fromUser($user);
+//        return JsonWebToken::getToken($this);
+////        return JsonWebToken::fromUser($user);
+//    }
+
+    /**
+     * 获取将存储在 JWT 主题声明中的标识符
+     *
+     * @return string
+     */
+    public function getJWTIdentifier(): string
     {
-        return JsonWebToken::getToken($this);
+        return $this->getKey();
+    }
+
+    /**
+     * 返回一个键值数组，其中包含要添加到 JWT 的任何自定义声明
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [
+            '_id' => $this->getUserId(),
+            'created_at' => $this->getAttribute('sing_in_at'),
+            'nick_name' => '',
+            '__v' => 0,
+            'avatar' => ''
+        ];
+
+        /**
+         * 例子
+         *
+         * '_id': '5f2918ed59d0b03366c0f0ad,
+         * 'email': '111@test.com',
+         * 'password': '$2a$10NPgFsgNVtIz3hHI5kdalYouiZe73oyV7bVcnP6vh2CaLR8uASjaOm',
+         * 'nickName': '废品回收',
+         * 'role': [
+         *   '_id': "5e60698bdb60f64b57e36133',
+         *   'name': 'normalUser',
+         *   '__v': 0.
+         *   createdAt': '2020-08-04T08:14:37.470Z',
+         *   'access': 'user'
+         * ],
+         * '__v': 0,
+         * 'column': '5f4db92abb821789a5490ed3',
+         * 'description': '这是废品回收的简介',
+         * 'avatar': '6183ad52fc0f930997b02819',
+         * 'createdAt': '2020-08-04T08:14:37.470Z'
+         */
+    }
+
+    private function getUserId()
+    {
+        return $this->getAttribute('user_id');
     }
 }
