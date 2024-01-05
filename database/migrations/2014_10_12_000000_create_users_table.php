@@ -27,7 +27,7 @@ return new class extends Migration {
             $table->dateTime('sing_in_at')->nullable(false)->comment('注册时间');
             $table->tinyInteger('status')->nullable(false)->comment('用户状态: 0 - 正常,1 - 冻结,-1 - 删除/注销');
 
-            $table->unique('country_code', 'pure_phone_number');
+            $table->unique(['country_code', 'pure_phone_number', 'status']);
             $table->index('status');
         });
     }

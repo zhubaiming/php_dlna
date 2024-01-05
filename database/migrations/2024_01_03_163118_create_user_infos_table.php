@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('pure_name', 30)->nullable(false)->comment('用户真实姓名');
             $table->string('idcard', 20)->nullable(false)->unique()->comment('用户身份证号码');
             $table->string('nick_name', 20)->nullable(false)->comment('用户昵称');
+            $table->string('avatar', 255)->nullable(true)->comment('用户头像图片的 URL');
+            $table->string('description', 255)->nullable(true)->comment('用户简介');
             $table->unsignedTinyInteger('gender')->nullable(false)->comment('用户性别: 0 - 未知,1 - 男,2 - 女');
             $table->string('country', 20)->nullable(true)->comment('用户所在国家');
             $table->string('province', 20)->nullable(true)->comment('用户所在省份');
