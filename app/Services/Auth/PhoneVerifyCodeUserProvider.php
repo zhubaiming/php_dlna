@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Enums\UserEnum;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,26 @@ class PhoneVerifyCodeUserProvider extends EloquentUserProvider
         );
 
         return parent::retrieveByCredentials($credentials);
+    }
+
+    /**
+     * 验证给定用户的状态
+     *
+     * @param UserContract $user
+     * @return bool
+     * @throws \Exception
+     */
+    public function validateUserStatus(UserContract $user): bool
+    {
+        switch ($user->status) {
+            case UserEnum::USER_NORMAL:
+                return true;
+            case UserEnum::USER_INVALID:
+                return false;
+            case UserEnum::USER_FREEZE:
+            default:
+                throw new \Exception();
+        }
     }
 
     /**
