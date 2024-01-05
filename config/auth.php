@@ -41,7 +41,7 @@ return [
             'provider' => 'users',
         ],
         'wechat' => [
-            'driver' => 'jwt',
+            'driver' => 'custom-jwt',
             'provider' => 'wechatUsers'
         ],
         'api' => [
