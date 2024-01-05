@@ -11,7 +11,7 @@ trait WechatTrait
     protected function wechatLogin($input): \Illuminate\Http\JsonResponse
     {
         if (!$this->validateRequest($input)) {
-            return $this->failed($this->validateErrorMessage, HttpCode::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->failed($this->validateErrorMessage, 90001, HttpCode::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $credentials = $this->convertDataFormat();
@@ -20,9 +20,9 @@ trait WechatTrait
             Auth::guard('wechat')->attempt($credentials) ||
             Auth::guard('wechat')->register($credentials)
         ) {
-            return $this->success(Auth::guard('wechat')->user()->last_token);
+            return $this->loginSuccess(Auth::guard('wechat')->user()->last_token);
         } else {
-            return $this->failed('用户登录失败', HttpCode::HTTP_UNAUTHORIZED);
+            return $this->failed('用户登录失败', 10001, HttpCode::HTTP_UNAUTHORIZED);
         }
     }
 
@@ -51,7 +51,7 @@ trait WechatTrait
         ]);
 
         if ($validator->stopOnFirstFailure()->fails()) {
-            $this->validateErrorMessage = $validator->errors();
+            $this->validateErrorMessage = $validator->errors()->first();
             return false;
         } else {
             $this->validateSafeAll = array_merge($this->validateSafeAll, $validator->validated());
