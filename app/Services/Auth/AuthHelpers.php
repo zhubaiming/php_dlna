@@ -108,7 +108,7 @@ trait AuthHelpers
      */
     protected function hasValidCredentials(mixed $user, array $credentials): bool
     {
-        return !is_null($user) && $this->provider->validateCredentials($user, $credentials);
+        return !is_null($user) && $this->provider->validateUserStatus($user) && $this->provider->validateCredentials($user, $credentials);
     }
 
     /**

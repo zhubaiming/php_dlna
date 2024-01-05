@@ -120,7 +120,7 @@ class WechatAuth implements StatefulGuard
     public function login(Authenticatable $user, $remember = false): void
     {
         // 1、获取 token
-        $this->token = $user->getJWTIdentifier();
+        $this->token = app()->make('tymon.jwt')->fromUser($user);
 
         // 2、创建或更新redis信息
         $this->updateToken($user);
@@ -207,12 +207,12 @@ class WechatAuth implements StatefulGuard
         Redis::Setex($this->redis_key_prefix . md5($user->id), 7200, base64_encode(gzcompress(serialize($user))));
     }
 
-    private function validateWechatCode($credentials)
+    private function validateWechatCode($credentials): bool
     {
         return is_null($credentials['wxLoginCode']);
     }
 
-    private function createUser($credentials)
+    private function createUser($credentials): User
     {
         $user = new User();
 
