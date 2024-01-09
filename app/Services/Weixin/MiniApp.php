@@ -7,7 +7,7 @@ use Illuminate\Http\Client\RequestException;
 
 class MiniApp extends Base
 {
-    protected function jscodeToSession($code)
+    public function jscodeToSession($code)
     {
         try {
             $this->getHttp('https://api.weixin.qq.com/sns/jscode2session', [
@@ -18,24 +18,12 @@ class MiniApp extends Base
             ]);
 
             if (isset($this->response_body['errcode'])) {
-                $str = match ($this->response_body['errcode']) {
-                    40163 => 'code已经被使用',
-                    40029 => '无效的code',
-                    40066 => '无效的请求地址',
-                };
-
-                throw new WechatAPIException([
-                    'method_name' => __METHOD__,
-                    'args' => func_get_arg(0)
-                ], $str, $this->response_body['errcode']);
+                throw new WechatAPIException(['method_name' => __METHOD__, 'args' => func_get_args()], $this->response_body['errmsg'], $this->response_body['errcode']);
             }
 
             return json_decode($this->response_body->body(), true);
-        } catch (RequestException $e) {
-            throw new WechatAPIException([
-                'method_name' => __METHOD__,
-                'args' => func_get_arg(0)
-            ], $e->getMessage(), $e->getCode());
+        } catch (RequestException $exception) {
+            throw new WechatAPIException(['method_name' => __METHOD__, 'args' => func_get_args()], $exception->getMessage(), $exception->getCode());
         }
     }
 }
