@@ -42,8 +42,9 @@ return [
         'accesskey_id' => env('ALY_ACCESSKEY_ID'),
         'accesskey_secret' => env('ALY_ACCESSKEY_SECRET'),
         'dysms' => [
-            'sign_name' => env('ALY_DYSMS_SIGN_NAME'),
+            'sign_name' => 'local' === env('APP_ENV') ? '阿里云短信测试' : env('ALY_DYSMS_SIGN_NAME'),
             'template_code' => env('ALY_DYSMS_TEMPLATE_CODE'),
+            'login_template_code' => 'local' === env('APP_ENV') ? 'SMS_154950909' : env('ALY_DYSMS_LOGIN_TEMPLATE_CODE'),
         ]
     ]
 ];

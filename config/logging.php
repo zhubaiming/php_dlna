@@ -71,6 +71,13 @@ return [
             'permission' => 0755,
             'locking' => true
         ],
+        'aliyunApi' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/aliyunApi/' . date('Y-m-d') . '.log'),
+            'bubble' => false,
+            'permission' => 0755,
+            'locking' => true
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

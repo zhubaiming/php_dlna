@@ -41,8 +41,8 @@ return [
             'provider' => 'users',
         ],
         'wechat' => [
-            'driver' => 'custom-jwt',
-            'provider' => 'wechatUsers'
+            'driver' => 'custom-wechat-jwt',
+            'provider' => 'customUsers'
         ],
         'api' => [
             'driver' => 'jwt',
@@ -73,7 +73,7 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        'wechatUsers' => [
+        'customUsers' => [
             'driver' => 'phone-verify-Code',
             'model' => App\Models\User::class,
         ]
