@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Services\WorkWeixin\MarkdownMessage;
 use Exception;
 
 class BaseException extends Exception
@@ -17,6 +18,8 @@ class BaseException extends Exception
         $this->code = $code;
 
         $this->primitives = $primitives;
+
+        (new MarkdownMessage())->sendException('15940551528', static::class, $code, $message);
     }
 
     public function getPrimitives()
