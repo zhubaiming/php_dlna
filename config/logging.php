@@ -78,6 +78,22 @@ return [
             'permission' => 0755,
             'locking' => true
         ],
+        'workWeixinApi' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/workWeixinApi/' . date('Y-m-d') . '.log'),
+            'bubble' => false,
+            'permission' => 0755,
+            'locking' => true
+        ],
+        'sql' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Sql/' . date('Y-m-d') . '.log'),
+            'bubble' => false,
+            'permission' => 0755,
+            'locking' => true
+        ],
+
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],
