@@ -10,7 +10,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redis;
 
-class WechatAuth implements StatefulGuard
+class WechatAuthGuard implements StatefulGuard
 {
     use AuthHelpers;
 
