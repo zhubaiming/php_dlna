@@ -30,12 +30,12 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
+                ->prefix('api/wechatMiniApp')
+                ->group(base_path('routes/wechat.php'));
 
             Route::middleware('api')
-                ->prefix('wechatMiniApp')
-                ->group(base_path('routes/wechat.php'));
+                ->prefix('api')
+                ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
