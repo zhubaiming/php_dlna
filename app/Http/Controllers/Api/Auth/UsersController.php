@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Facades\SMS;
 use App\Http\Controllers\Api\Controller;
+use App\Http\Requests\Api\Auth\SendVerificationCodeRequest;
+use App\Jobs\SendSMSJob;
 use Illuminate\Http\Request;
 
 class UsersController extends Controller
@@ -47,6 +50,17 @@ class UsersController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function sendVerificationCode(SendVerificationCodeRequest $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validated();
+
+        $code = mt_rand(100001, 999999);
+
+        SendSMSJob::dispatch(SMS::guard('sms.login'), [$validated['prefix'], $validated['phoneNumber'], $code]);
+
+        return $this->success();
     }
 
     public function login(Request $request)
