@@ -7,6 +7,13 @@ use Illuminate\Foundation\Http\FormRequest as BaseFormRequest;
 class FormRequest extends BaseFormRequest
 {
     /**
+     * 验证器是否应在第一个规则失败时停止
+     *
+     * @var bool
+     */
+    protected $stopOnFirstFailure = true;
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
