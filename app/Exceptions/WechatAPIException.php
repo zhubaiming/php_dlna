@@ -6,6 +6,12 @@ use Illuminate\Support\Facades\Log;
 
 class WechatAPIException extends BaseException
 {
+    private $error_messages = [
+        40163 => 'code已经被使用',
+        40029 => '无效的code',
+        40066 => '无效的请求地址',
+    ];
+
     /**
      * 获取异常上下文信息
      *
@@ -23,6 +29,7 @@ class WechatAPIException extends BaseException
      */
     public function report()
     {
-        Log::channel('wechatApi')->error('[error] - ' . date('Y-m-d H:i:s') . ' - ' . $this->getCode() . ' - ' . $this->getMessage(), $this->getPrimitives());
+        $code = $this->getCode();
+        Log::channel('wechatApi')->error('[error] - ' . date('Y-m-d H:i:s') . ' - ' . $code . ' - ' . $this->error_messages[$code] . '(' . $this->getMessage() . ')', $this->getPrimitives());
     }
 }
