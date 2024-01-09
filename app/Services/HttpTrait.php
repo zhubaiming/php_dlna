@@ -14,8 +14,6 @@ trait HttpTrait
 
     protected $response_body;
 
-    protected $response_code;
-
     private array $jscode_to_session_fake = [
         ['session_key' => 'fake/49mPa3V6s/nwGh85MWh5DA==', 'openid' => 'fake/o8OZx526yGHmYDirUvD4lrb53Vkg'],
         ['errcode' => 40163, 'errmsg' => 'fake, code been used, rid: 65927735-29b25d7a-78c318a8'],
@@ -25,18 +23,36 @@ trait HttpTrait
 
     public function getHttp(string $url, array $data = []): void
     {
-        if ('local' === config('app.env')) {
-            Http::preventStrayRequests();
-
-//            $fake_key = random_int(0, count($this->jscode_to_session_fake) - 1);
-            $fake_key = 0;
-
-            Http::fake([
-                'qq.com/*' => Http::response($this->jscode_to_session_fake[$fake_key], 200)
-            ]);
-        }
+//        if ('local' === config('app.env')) {
+//            Http::preventStrayRequests();
+//
+////            $fake_key = random_int(0, count($this->jscode_to_session_fake) - 1);
+//            $fake_key = 0;
+//
+//            Http::fake([
+//                'api.weixin.qq.com/*' => Http::response($this->jscode_to_session_fake[$fake_key], 200)
+//            ]);
+//        }
 
         $response = $this->baseHttp()->get($url, $data);
+
+        $this->checkHttpResponse($response);
+    }
+
+    public function postHttp(string $url, array $data = [])
+    {
+//        if ('local' === config('app.env')) {
+//            Http::preventStrayRequests();
+//
+////            $fake_key = random_int(0, count($this->jscode_to_session_fake) - 1);
+//            $fake_key = 0;
+//
+//            Http::fake([
+//                'api.weixin.qq.com/*' => Http::response($this->jscode_to_session_fake[$fake_key], 200)
+//            ]);
+//        }
+
+        $response = $this->baseHttp()->acceptJson()->post($url, $data);
 
         $this->checkHttpResponse($response);
     }
