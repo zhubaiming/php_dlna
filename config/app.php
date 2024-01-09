@@ -184,7 +184,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
-        'SMS' => App\Facades\SMS::class
+        'WechatMiniApp' => App\Facades\WechatMiniApp::class,
+        'SMS' => App\Facades\SMS::class,
     ])->toArray(),
 
 ];
