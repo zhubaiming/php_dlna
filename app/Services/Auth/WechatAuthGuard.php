@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Facades\WechatMiniApp;
 use App\Models\User;
 use App\Services\MistID;
 use App\Services\Weixin\MiniApp;
@@ -173,7 +174,7 @@ class WechatAuthGuard implements StatefulGuard
         if ($this->validateWechatCode($credentials)) {
             return false;
         }
-        $wechat_session = MiniApp::jscodeToSession([$credentials['wxLoginCode']]);
+        $wechat_session = WechatMiniApp::jscodeToSession($credentials['wxLoginCode']);
 
         // 2、创建用户
         $user = $this->createUser(array_merge($credentials, $wechat_session));
