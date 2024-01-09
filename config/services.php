@@ -46,5 +46,17 @@ return [
             'template_code' => env('ALY_DYSMS_TEMPLATE_CODE'),
             'login_template_code' => 'local' === env('APP_ENV') ? 'SMS_154950909' : env('ALY_DYSMS_LOGIN_TEMPLATE_CODE'),
         ]
+    ],
+
+    'work_weixin' => [
+        'corpid' => env('WORK_WX_CORPID'),
+        'corp' => 'default'
+    ],
+
+    'work_weixin_corp' => [
+        'default' => [
+            'agentid' => env('WORK_WEIXIN_CORP_DEFAULT_AGENTID'),
+            'secret' => env('WORK_WEIXIN_CORP_DEFAULT_SECRET')
+        ]
     ]
 ];
