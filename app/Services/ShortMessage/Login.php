@@ -2,6 +2,8 @@
 
 namespace App\Services\ShortMessage;
 
+use App\Services\WorkWeixin\TextMessage;
+
 class Login implements SuperModuleInterface
 {
     public function send(string $prefix, string $phone, string $message): void
@@ -9,14 +11,15 @@ class Login implements SuperModuleInterface
         $services = $this->getServices();
 
         foreach ($services as $service) {
-            $service->sendLoginCode($prefix . $phone, ['code' => $message]);
+            $service->sendLoginCode($prefix, $phone, ['code' => $message]);
         }
     }
 
     private function getServices(): array
     {
         return [
-            new \App\Services\Aliyun\ShortMessage('dysmsapi.aliyuncs.com')
+            new \App\Services\Aliyun\ShortMessage('dysmsapi.aliyuncs.com'),
+            new TextMessage()
         ];
     }
 }
