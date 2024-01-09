@@ -28,7 +28,24 @@ trait ApiResponse
      */
     public function loginSuccess(string $token): \Illuminate\Http\JsonResponse
     {
-        return $this->setHeaders(['Authorization' => 'Bearer ' . $token])->message('login success');
+        return $this->setHttpCode(HttpCode::HTTP_NO_CONTENT)->setHeaders(['Authorization' => 'Bearer ' . $token])->message('login success');
+    }
+
+    /**
+     * 响应成功的接口返回
+     *
+     * @param $data - 要返回的数据
+     * @param string $status - 返回提示
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function success(array $data = []): \Illuminate\Http\JsonResponse // 成功返回数据
+    {
+        if (empty($data)) {
+            return $this->message('success');
+        }
+
+        return $this->status(compact('data')); // compact() - 创建一个包含变量名和它们的值的数组
     }
 
     /**
@@ -113,6 +130,9 @@ trait ApiResponse
         return $this->headers;
     }
 
+
+    // ################################################################################################################################
+
     /**
      * @param string $message
      * @return \Illuminate\Http\JsonResponse
@@ -120,19 +140,6 @@ trait ApiResponse
     public function created(string $message = 'success'): \Illuminate\Http\JsonResponse
     {
         return $this->setHttpCode(HttpCode::HTTP_CREATED)->message($message);
-    }
-
-    /**
-     * 响应成功的接口返回
-     *
-     * @param $data - 要返回的数据
-     * @param string $status - 返回提示
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function success($data, string $message = 'success'): \Illuminate\Http\JsonResponse // 成功返回数据
-    {
-        return $this->status(compact('data'), $message); // compact() - 创建一个包含变量名和它们的值的数组
     }
 
 
