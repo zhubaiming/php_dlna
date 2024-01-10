@@ -19,7 +19,7 @@ class BaseException extends Exception
 
         $this->primitives = $primitives;
 
-        (new MarkdownMessage())->sendException('15940551528', static::class, $code, $message);
+        (new MarkdownMessage())->sendException('email', 'benhai@icloudpdtzzs.wecom.work', static::class, $code, $message);
     }
 
     public function getPrimitives()
