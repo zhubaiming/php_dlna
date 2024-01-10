@@ -13,11 +13,11 @@ class Base
 
     private $base_url = 'https://qyapi.weixin.qq.com/cgi-bin';
 
-    public $corp_config;
+    private $corp_config;
 
-    public $access_token;
+    private $access_token;
 
-    public $has_access_token = false;
+    private $has_access_token = false;
 
     protected function getToken($corp): void
     {
@@ -47,7 +47,29 @@ class Base
         }
     }
 
-    protected function getUserId($mobile)
+    /**
+     * 选择获取用户id方式
+     *
+     * @param $type
+     * @return bool|string
+     */
+    protected function chooseGetUserIdType($type): bool|string
+    {
+        return match ($type) {
+            'mobile' => 'getUserIdByMobile',
+            'email' => 'getUserIdByEmail',
+            default => false,
+        };
+    }
+
+    /**
+     * 手机号获取userid
+     *
+     * @param $mobile    用户在企业微信通讯录中的手机号码。长度为5～32个字节
+     * @return mixed
+     * @throws WorkWeixinAPIException
+     */
+    protected function getUserIdByMobile($mobile)
     {
         $data = compact('mobile');
 
@@ -56,28 +78,78 @@ class Base
         return $response['userid'];
     }
 
+    /**
+     * 邮箱获取 userid
+     *
+     * @param $email        邮箱
+     * @param $email_type   邮箱类型：1-企业邮箱（默认）；2-个人邮箱
+     * @return mixed
+     * @throws WorkWeixinAPIException
+     */
+    protected function getUserIdByEmail($email, $email_type = 1)
+    {
+        $data = compact('email', 'email_type');
+
+        $response = $this->send('/user/get_userid_by_email', $data);
+
+        return $response['userid'];
+    }
+
     protected function sendText($content, $to_user = '@all', $safe = 0): void
     {
+        if (is_array($to_user)) $to_user = implode('|', $to_user);
+
         $data = [
             'touser' => $to_user,
-            'msgtype' => "text",
+            'msgtype' => 'text',
             'agentid' => $this->corp_config['agentid'],
-            'text' => ["content" => $content],
+            'text' => ['content' => $content],
             'safe' => $safe
         ];
 
-        $response = $this->send('/user/getuserid', $data);
-//        $response = $this->send('/message/send', $data);
+        $response = $this->send('/message/send', $data);
     }
 
-    protected function sendMarkdown($content, $to_user = '@all', $safe = 0)
+    protected function sendMarkdown($content, $to_user = '@all', $safe = 0): void
     {
+        if (is_array($to_user)) $to_user = implode('|', $to_user);
+
         $data = [
             'touser' => $to_user,
-            'msgtype' => "markdown",
+            'msgtype' => 'markdown',
             'agentid' => $this->corp_config['agentid'],
-            'markdown' => ["content" => $content],
+            'markdown' => ['content' => $content],
             'safe' => $safe
+        ];
+
+        $response = $this->send('/message/send', $data);
+    }
+
+    protected function sendNews($content, $to_user = '@all', $safe = 0): void
+    {
+        if (is_array($to_user)) $to_user = implode('|', $to_user);
+
+        $data = [
+            'touser' => $to_user,
+            'msgtype' => 'news',
+            'agentid' => $this->corp_config['agentid'],
+            'news' => ['articles' => $content],
+            'safe' => $safe
+        ];
+
+        $response = $this->send('/message/send', $data);
+    }
+
+    protected function sendMiniprogramNotice($content, $to_user)
+    {
+        $content['appid'] = config('services.wechat.mini_app.app_id');
+
+        $to_user = implode('|', $to_user);
+
+        $data = [
+            'touser' => $to_user,
+            'msgtype' => 'miniprogram_notice',
+            'miniprogram_notice' => $content
         ];
 
         $response = $this->send('/message/send', $data);

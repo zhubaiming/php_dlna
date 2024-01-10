@@ -8,7 +8,7 @@ class TextMessage extends Base
     {
         $this->getToken('default');
 
-        $user_id = $this->getUserId($phone);
+        $user_id = $this->getUserIdByMobile($phone);
 
         $this->sendText('您的验证码为: ' . $template_param['code'], $user_id);
     }
