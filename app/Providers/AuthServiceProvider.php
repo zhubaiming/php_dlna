@@ -44,7 +44,7 @@ class AuthServiceProvider extends ServiceProvider
          */
         Auth::extend('custom-wechat-jwt', function (Application $app, string $name, array $config) {
             // 返回 Illuminate\Contracts\Auth\Guard 的实例
-            return new WechatAuthGuard($name, Auth::createUserProvider($config['provider']));
+            return new WechatAuthGuard($app, $name, Auth::createUserProvider($config['provider']));
         });
 
         /**
