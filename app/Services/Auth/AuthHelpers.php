@@ -7,27 +7,35 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 trait AuthHelpers
 {
-    protected $user;
+    protected $app;
 
     protected $name;
 
     protected $provider;
 
-    protected $time;
-
     protected $token;
+
+    protected $user;
+
+
+    protected $time;
 
     protected $events;
 
     protected $request;
 
-    public function __construct($name, UserProvider $provider)
+    public function __construct(Application $app, $name, UserProvider $provider)
     {
+        $this->app = $app;
+
         $this->name = $name;
 
         $this->provider = $provider;
@@ -87,6 +95,92 @@ trait AuthHelpers
         //        $this->fireAuthenticatedEvent($user);
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function check()
+    {
+        try {
+            $jwt = $this->app->make('tymon.jwt')->parseToken();
+
+            if ($this->onceUsingId($jwt->getPayload()->get('sub')) && $jwt->getToken()->get() === $this->user()->last_token) {
+                return true;
+            }
+
+            return false;
+        } catch (JWTException $exception) {
+            throw new UnauthorizedHttpException('auth', $exception->getMessage());
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function onceUsingId($id): bool
+    {
+        if (!is_null($user = $this->provider->retrieveById($id))) {
+
+            $this->setUser($user);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 获取当前已通过身份验证的用户
+     *
+     * @return void
+     */
+    public function user()
+    {
+        //if ($this->loggedOut) {
+        //            return;
+        //        }
+        //
+        //        // 如果我们已经为当前请求获取了用户数据，则可以立即返回。
+        //        // 我们不想在每次调用该方法时都获取用户数据，因为那样会非常慢。
+        //        if (! is_null($this->user)) {
+        //            return $this->user;
+        //        }
+        //
+        //        $id = $this->session->get($this->getName());
+        //
+        //        // 首先，如果会话中存在标识符，我们将尝试使用该标识符加载用户。
+        //        // 否则，我们将检查该请求中是否存在 "记住我 "cookie，如果存在，则尝试使用该cookie检索用户。
+        //        if (! is_null($id) && $this->user = $this->provider->retrieveById($id)) {
+        //            $this->fireAuthenticatedEvent($this->user);
+        //        }
+        //
+        //        // 如果用户为空，但我们解密了一个 "recaller "cookie，我们就可以尝试在该 cookie 上提取用户数据，该 cookie 将作为应用程序的记忆 cookie
+        //        // 。一旦有了用户，我们就可以将其返回给调用者。
+        //        if (is_null($this->user) && ! is_null($recaller = $this->recaller())) {
+        //            $this->user = $this->userFromRecaller($recaller);
+        //
+        //            if ($this->user) {
+        //                $this->updateSession($this->user->getAuthIdentifier());
+        //
+        //                $this->fireLoginEvent($this->user, true);
+        //            }
+        //        }
+        //
+        //        return $this->user;
+        // TODO: Implement user() method.
+
+        if (!is_null($this->user)) {
+            return $this->user;
+        }
+    }
+
+    public function refresh()
+    {
+        // $token = $this->auth->parseToken()->refresh();
+        // $id = $this->app->make('tymon.jwt')->parseToken()->getPayload()->get('sub');
+
+        $token = $this->app->make('tymon.jwt')->refresh();
     }
 
     public function setDispatcher(Dispatcher $events): void

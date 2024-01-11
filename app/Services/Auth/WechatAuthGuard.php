@@ -17,13 +17,6 @@ class WechatAuthGuard implements StatefulGuard
 
     private string $redis_key_prefix = 'User_login_';
 
-    /**
-     * @inheritDoc
-     */
-    public function check()
-    {
-        // TODO: Implement check() method.
-    }
 
     /**
      * @inheritDoc
@@ -33,50 +26,6 @@ class WechatAuthGuard implements StatefulGuard
         // TODO: Implement guest() method.
     }
 
-    /**
-     * Get the currently authenticated user.
-     *
-     * @return Authenticatable|void|null
-     */
-    public function user()
-    {
-        //if ($this->loggedOut) {
-        //            return;
-        //        }
-        //
-        //        // 如果我们已经为当前请求获取了用户数据，则可以立即返回。
-        //        // 我们不想在每次调用该方法时都获取用户数据，因为那样会非常慢。
-        //        if (! is_null($this->user)) {
-        //            return $this->user;
-        //        }
-        //
-        //        $id = $this->session->get($this->getName());
-        //
-        //        // 首先，如果会话中存在标识符，我们将尝试使用该标识符加载用户。
-        //        // 否则，我们将检查该请求中是否存在 "记住我 "cookie，如果存在，则尝试使用该cookie检索用户。
-        //        if (! is_null($id) && $this->user = $this->provider->retrieveById($id)) {
-        //            $this->fireAuthenticatedEvent($this->user);
-        //        }
-        //
-        //        // 如果用户为空，但我们解密了一个 "recaller "cookie，我们就可以尝试在该 cookie 上提取用户数据，该 cookie 将作为应用程序的记忆 cookie
-        //        // 。一旦有了用户，我们就可以将其返回给调用者。
-        //        if (is_null($this->user) && ! is_null($recaller = $this->recaller())) {
-        //            $this->user = $this->userFromRecaller($recaller);
-        //
-        //            if ($this->user) {
-        //                $this->updateSession($this->user->getAuthIdentifier());
-        //
-        //                $this->fireLoginEvent($this->user, true);
-        //            }
-        //        }
-        //
-        //        return $this->user;
-        // TODO: Implement user() method.
-
-        if (!is_null($this->user)) {
-            return $this->user;
-        }
-    }
 
     /**
      * @inheritDoc
@@ -121,7 +70,7 @@ class WechatAuthGuard implements StatefulGuard
     public function login(Authenticatable $user, $remember = false): void
     {
         // 1、获取 token
-        $this->token = app()->make('tymon.jwt')->fromUser($user);
+        $this->token = $this->app->make('tymon.jwt')->fromUser($user);
 
         // 2、创建或更新redis信息
         $this->updateToken($user);
@@ -138,13 +87,6 @@ class WechatAuthGuard implements StatefulGuard
         // TODO: Implement loginUsingId() method.
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function onceUsingId($id)
-    {
-        // TODO: Implement onceUsingId() method.
-    }
 
     /**
      * @inheritDoc
@@ -182,6 +124,8 @@ class WechatAuthGuard implements StatefulGuard
         // 3、验证用户验证码
         if ($this->hasValidCredentials($user, $credentials)) {
 
+            $user->save();
+
             // 4、触发注册事件
             $this->fireRegisterEvent($user);
 
@@ -205,7 +149,7 @@ class WechatAuthGuard implements StatefulGuard
         $user->last_token = $this->token;
 
 //        Redis::Hmset('User_login_' . md5($user->id), $user->toArray());
-        Redis::Setex($this->redis_key_prefix . md5($user->id), 7200, base64_encode(gzcompress(serialize($user))));
+        Redis::Setex($this->redis_key_prefix . md5($user->id), config('jwt.ttl') * 60, base64_encode(gzcompress(serialize($user))));
     }
 
     private function validateWechatCode($credentials): bool

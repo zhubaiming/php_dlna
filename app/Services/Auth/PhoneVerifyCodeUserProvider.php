@@ -88,4 +88,17 @@ class PhoneVerifyCodeUserProvider extends EloquentUserProvider
     {
         return $value === $value_confirmed;
     }
+
+    /**
+     * 通过用户的唯一标识符检索用户
+     *
+     * @param $identifier
+     * @return UserContract|mixed|null
+     */
+    public function retrieveById($identifier)
+    {
+        $user = Redis::get('User_login_' . md5($identifier));
+
+        return is_null($user) ? $user : unserialize(gzuncompress(base64_decode($user)));
+    }
 }
