@@ -14,7 +14,7 @@ class ErpPurchaseGoodsRecordYancaoSeeder extends Seeder
     public function run(): void
     {
         $file_to_read = [];
-//        $file_to_read = fopen(storage_path('csvs/yancao/20240108171236.csv'), 'r');
+//        $file_to_read = fopen(storage_path('csvs/yancao/20240110095439.csv'), 'r');
 
         $idx = 0;
         while (!feof($file_to_read)) {
@@ -87,7 +87,7 @@ class ErpPurchaseGoodsRecordYancaoSeeder extends Seeder
                 'price' => $value[2],
                 'total_price' => $value[5],
                 'factory' => '烟草',
-                'purchased_at' => '2022-12-05',
+                'purchased_at' => '2024-01-09',
                 'created_at' => date('Y-m-d H:i:s'),
             ];
         }
