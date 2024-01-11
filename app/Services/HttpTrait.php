@@ -23,17 +23,6 @@ trait HttpTrait
 
     public function getHttp(string $url, array $data = []): void
     {
-//        if ('local' === config('app.env')) {
-//            Http::preventStrayRequests();
-//
-////            $fake_key = random_int(0, count($this->jscode_to_session_fake) - 1);
-//            $fake_key = 0;
-//
-//            Http::fake([
-//                'api.weixin.qq.com/*' => Http::response($this->jscode_to_session_fake[$fake_key], 200)
-//            ]);
-//        }
-
         $response = $this->baseHttp()->get($url, $data);
 
         $this->checkHttpResponse($response);
@@ -41,17 +30,6 @@ trait HttpTrait
 
     public function postHttp(string $url, array $data = [])
     {
-//        if ('local' === config('app.env')) {
-//            Http::preventStrayRequests();
-//
-////            $fake_key = random_int(0, count($this->jscode_to_session_fake) - 1);
-//            $fake_key = 0;
-//
-//            Http::fake([
-//                'api.weixin.qq.com/*' => Http::response($this->jscode_to_session_fake[$fake_key], 200)
-//            ]);
-//        }
-
         $response = $this->baseHttp()->acceptJson()->post($url, $data);
 
         $this->checkHttpResponse($response);
@@ -107,6 +85,14 @@ trait HttpTrait
 
     private function baseHttp(): \Illuminate\Http\Client\PendingRequest
     {
+        if ('local' === config('app.env')) {
+            Http::preventStrayRequests();
+
+            Http::fake([
+                'api.weixin.qq.com/*' => Http::response(['session_key' => 'fake/49mPa3V6s/nwGh85MWh5DA==', 'openid' => 'fake/o8OZx526yGHmYDirUvD4lrb53Vkg'], 200)
+            ]);
+        }
+
         return Http::withHeaders([])
             ->connectTimeout($this->connectTimeout)
             ->retry($this->retryTimes, $this->retrySleep);
