@@ -12,4 +12,6 @@ class Controller extends BaseController
     protected array $validateSafeAll = [];
 
     protected $validateErrorMessage;
+
+    protected $modelService;
 }
