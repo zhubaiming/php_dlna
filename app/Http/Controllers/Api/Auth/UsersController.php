@@ -65,7 +65,7 @@ class UsersController extends Controller
 
     public function login(Request $request)
     {
-        if ($request->missing('origin')) return $this->failed('login missing origin');
+        if ($request->missing('origin')) return $this->failed('login missing origin', 999999);
 
         $loginMethod = strtolower($request->input('origin')) . 'Login';
 
@@ -73,6 +73,6 @@ class UsersController extends Controller
 
         if (method_exists($this, $loginMethod)) return $this->{$loginMethod}($request->input());
 
-        return config('app.env') === 'local' ? $this->failed('this not exists method ' . $loginMethod) : $this->internalError('网络错误');
+        return config('app.env') === 'local' ? $this->failed('this not exists method ' . $loginMethod, 999999) : $this->internalError('网络错误');
     }
 }
