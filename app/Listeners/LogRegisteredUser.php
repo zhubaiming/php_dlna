@@ -20,8 +20,6 @@ class LogRegisteredUser
      */
     public function handle(Registered $event): void
     {
-        $event->user->save();
-
         DB::table('log_user_levels')->insert([
             'user_id' => $event->user->user_id,
             'level' => 0,
