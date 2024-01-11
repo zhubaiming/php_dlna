@@ -142,6 +142,14 @@ return [
     | A TokenInvalidException will be thrown if any of these claims are not
     | present in the payload.
     |
+    | iss (issuer)：签发人
+    | sub (subject)：主题
+    | aud (audience)：受众
+    | exp (expiration time)：过期时间
+    | nbf (Not Before)：生效时间，在此之前是无效的
+    | iat (Issued At)：签发时间
+    | jti (JWT ID)：编号
+    |
     */
 
     'required_claims' => [
