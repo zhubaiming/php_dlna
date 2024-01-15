@@ -8,7 +8,7 @@ class ShortMessage extends Base
     {
         $this->setTemplateCode('login_template_code');
 
-        $this->assembleSendSmsRequest($prefix . $phone, $template_param);
+        $this->assembleSendSmsRequest($prefix . $phone, ['code' => $template_param]);
 
         $this->assembleSendSmsWithOptions();
     }
