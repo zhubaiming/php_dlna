@@ -2,7 +2,7 @@
 
 namespace App\Exceptions;
 
-use App\Services\WorkWeixin\MarkdownMessage;
+use App\Facades\WorkWeixin;
 use Exception;
 
 class BaseException extends Exception
@@ -19,7 +19,11 @@ class BaseException extends Exception
 
         $this->primitives = $primitives;
 
-        (new MarkdownMessage())->sendException('email', 'benhai@icloudpdtzzs.wecom.work', static::class, $code, $message);
+        if (!($previous instanceof WorkWeixinAPIException)) {
+            WorkWeixin::channel('work_wx.rob')->setKey('exception')->sendMarkdown(
+                "## 当前发生异常  \n  \n>**异常来源**: **<font color=\"warning\">" . static::class . "</font>**  \n>  \n>**异常状态码**: **<font color=\"warning\">" . $code . "</font>**  \n>  \n>**异常内容**:  \n>  \n>" . $message
+            );
+        }
     }
 
     public function getPrimitives()
