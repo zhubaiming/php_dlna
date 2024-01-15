@@ -13,151 +13,15 @@ class Base
 
     private $base_url = 'https://qyapi.weixin.qq.com/cgi-bin';
 
-    private $corp_config;
+    protected $corp;
 
     private $access_token;
 
-    private $has_access_token = false;
-
-    protected function getToken($corp): void
+    public function setCorp($corp)
     {
-        $this->corp_config = $this->getCorpConfig($corp);
+        $this->corp = config('services.work_weixin_corp.' . $corp) ?? $this->getDefaultCorpConfig();
 
-        if ($this->has_access_token) {
-            $this->access_token = $this->getRedisValue();
-        }
-
-        if (is_null($this->access_token)) {
-            $this->has_access_token = false;
-
-            try {
-                $this->getHttp($this->base_url . '/gettoken', [
-                    'corpid' => config('services.work_weixin.corpid'),
-                    'corpsecret' => $this->corp_config['secret']
-                ]);
-
-                if (0 !== $this->response_body['errcode']) {
-                    throw new WorkWeixinAPIException(['method_name' => __METHOD__], $this->response_body['errmsg'], $this->response_body['errcode']);
-                }
-
-                $this->access_token = $this->setRedisValue(json_decode($this->response_body->body(), true));
-            } catch (RequestException $exception) {
-                throw new WorkWeixinAPIException(['method_name' => __METHOD__, 'args' => func_get_args()], $exception->getMessage(), $exception->getCode());
-            }
-        }
-    }
-
-    /**
-     * 选择获取用户id方式
-     *
-     * @param $type
-     * @return bool|string
-     */
-    protected function chooseGetUserIdType($type): bool|string
-    {
-        return match ($type) {
-            'mobile' => 'getUserIdByMobile',
-            'email' => 'getUserIdByEmail',
-            default => false,
-        };
-    }
-
-    /**
-     * 手机号获取userid
-     *
-     * @param $mobile    用户在企业微信通讯录中的手机号码。长度为5～32个字节
-     * @return mixed
-     * @throws WorkWeixinAPIException
-     */
-    protected function getUserIdByMobile($mobile)
-    {
-        $data = compact('mobile');
-
-        $response = $this->send('/user/getuserid', $data);
-
-        return $response['userid'];
-    }
-
-    /**
-     * 邮箱获取 userid
-     *
-     * @param $email        邮箱
-     * @param $email_type   邮箱类型：1-企业邮箱（默认）；2-个人邮箱
-     * @return mixed
-     * @throws WorkWeixinAPIException
-     */
-    protected function getUserIdByEmail($email, $email_type = 1)
-    {
-        $data = compact('email', 'email_type');
-
-        $response = $this->send('/user/get_userid_by_email', $data);
-
-        return $response['userid'];
-    }
-
-    protected function sendText($content, $to_user = '@all', $safe = 0): void
-    {
-        if (is_array($to_user)) $to_user = implode('|', $to_user);
-
-        $data = [
-            'touser' => $to_user,
-            'msgtype' => 'text',
-            'agentid' => $this->corp_config['agentid'],
-            'text' => ['content' => $content],
-            'safe' => $safe
-        ];
-
-        $response = $this->send('/message/send', $data);
-    }
-
-    protected function sendMarkdown($content, $to_user = '@all', $safe = 0): void
-    {
-        if (is_array($to_user)) $to_user = implode('|', $to_user);
-
-        $data = [
-            'touser' => $to_user,
-            'msgtype' => 'markdown',
-            'agentid' => $this->corp_config['agentid'],
-            'markdown' => ['content' => $content],
-            'safe' => $safe
-        ];
-
-        $response = $this->send('/message/send', $data);
-    }
-
-    protected function sendNews($content, $to_user = '@all', $safe = 0): void
-    {
-        if (is_array($to_user)) $to_user = implode('|', $to_user);
-
-        $data = [
-            'touser' => $to_user,
-            'msgtype' => 'news',
-            'agentid' => $this->corp_config['agentid'],
-            'news' => ['articles' => $content],
-            'safe' => $safe
-        ];
-
-        $response = $this->send('/message/send', $data);
-    }
-
-    protected function sendMiniprogramNotice($content, $to_user)
-    {
-        $content['appid'] = config('services.wechat.mini_app.app_id');
-
-        $to_user = implode('|', $to_user);
-
-        $data = [
-            'touser' => $to_user,
-            'msgtype' => 'miniprogram_notice',
-            'miniprogram_notice' => $content
-        ];
-
-        $response = $this->send('/message/send', $data);
-    }
-
-    protected function getCorpConfig($corp)
-    {
-        return config('services.work_weixin_corp.' . $corp) ?? $this->getDefaultCorpConfig();
+        return $this;
     }
 
     protected function getDefaultCorpConfig()
@@ -170,32 +34,101 @@ class Base
         return config('services.work_weixin.corp');
     }
 
-    protected function getRedisValue()
+    protected function getCorpConfig($corp)
     {
-        return Redis::get('work_weixin_corp_access_token_' . $this->corp_config['agentid']);
+        return config('services.work_weixin_corp.' . $corp) ?? $this->getDefaultCorpConfig();
     }
 
-    protected function setRedisValue($result)
+    protected function getAgentId()
     {
-        $this->has_access_token = true;
+        return $this->corp['agentid'];
+    }
 
-        Redis::Setex('work_weixin_corp_access_token_' . $this->corp_config['agentid'], $result['expires_in'], $result['access_token']);
+    protected function getToken()
+    {
+        $this->access_token = $this->getRedisValue();
+
+        if (is_null($this->access_token)) {
+            $response = $this->sendGet('/gettoken', [
+                'corpid' => config('services.work_weixin.corpid'),
+                'corpsecret' => $this->corp['secret']
+            ], false);
+
+            $this->access_token = $this->setRedisValue($response);
+        }
+    }
+
+    private function getRedisValue()
+    {
+        return Redis::get('work_weixin_corp_access_token_' . $this->getAgentId());
+    }
+
+    private function setRedisValue($result)
+    {
+        Redis::Setex('work_weixin_corp_access_token_' . $this->getAgentId(), $result['expires_in'], $result['access_token']);
 
         return $result['access_token'];
+    }
+
+    protected function sendGet($uri, $data, $has_token = true, $debug = false)
+    {
+        $url = $this->base_url . $uri;
+
+        if ($has_token) {
+            $this->getToken();
+            $url .= '?access_token=' . $this->access_token;
+        }
+
+        if ('local' === config('app.env') && $debug) $url .= '&debug=1';
+
+        $response = $this->getHttp($url, $data);
+
+        return $this->checkResponse($response);
+    }
+
+    protected function sendPost($uri, $data, $has_token = true, $debug = false, $as = 'json')
+    {
+        $url = $this->base_url . $uri;
+
+        if ($has_token) {
+            $this->getToken();
+            $url .= '?access_token=' . $this->access_token;
+        }
+
+        if ('local' === config('app.env') && $debug) $url .= '&debug=1';
+
+        $response = $this->postHttp($url, $data, $as);
+
+        return $this->checkResponse($response);
+    }
+
+    private function checkResponse($response)
+    {
+        if (0 !== $response['errcode']) {
+            throw new WorkWeixinAPIException(['method_name' => __METHOD__], $response['errmsg'], $response['errcode']);
+        }
+
+        return $response;
     }
 
     private function send($uri, $data)
     {
         try {
-            $this->postHttp($this->base_url . $uri . '?access_token=' . $this->access_token, $data);
+            $url = $this->base_url . $uri . '?access_token=' . $this->access_token;
 
-            if (0 !== $this->response_body['errcode']) {
-                throw new WorkWeixinAPIException(['method_name' => __METHOD__], $this->response_body['errmsg'], $this->response_body['errcode']);
+            if ('local' === config('app.env')) $url .= '&debug=1';
+
+            $response = $this->postHttp($url, $data);
+
+            if (0 !== $response['errcode']) {
+                throw new WorkWeixinAPIException(['method_name' => __METHOD__], $response['errmsg'], $response['errcode']);
             }
 
-            return json_decode($this->response_body->body(), true);
+            return $response;
         } catch (RequestException $exception) {
             throw new WorkWeixinAPIException(['method_name' => __METHOD__, 'args' => func_get_args()], $exception->getMessage(), $exception->getCode());
         }
     }
+
+
 }
