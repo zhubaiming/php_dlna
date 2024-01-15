@@ -15,11 +15,19 @@ class Media extends Model
 
     public $timestamps = false;
 
-    // 加载全局作用域
+//    // 加载全局作用域
+//
+//    protected static function booted()
+//    {
+//        static::addGlobalScope(new AncientScope());
+//    }
 
+    // 匿名全局作用域
     protected static function booted()
     {
-        static::addGlobalScope(new AncientScope());
+        static::addGlobalScope('order_by', function (Builder $builder) {
+            $builder->orderBy('year', 'desc')->orderBy('updated_at', 'desc');
+        });
     }
 
     // 局部作用域
