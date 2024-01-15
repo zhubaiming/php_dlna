@@ -10,18 +10,18 @@ class MiniApp extends Base
     public function jscodeToSession($code)
     {
         try {
-            $this->getHttp('https://api.weixin.qq.com/sns/jscode2session', [
+            $response = $this->getHttp('https://api.weixin.qq.com/sns/jscode2session', [
                 'appid' => $this->appId,
                 'secret' => $this->appSecret,
                 'js_code' => $code,
                 'grant_type' => 'authorization_code'
             ]);
 
-            if (isset($this->response_body['errcode'])) {
-                throw new WechatAPIException(['method_name' => __METHOD__, 'args' => func_get_args()], $this->response_body['errmsg'], $this->response_body['errcode']);
+            if (isset($response['errcode']) && 0 !== $response['errcode']) {
+                throw new WechatAPIException(['method_name' => __METHOD__], $response['errmsg'], $response['errcode']);
             }
 
-            return json_decode($this->response_body->body(), true);
+            return $response;
         } catch (RequestException $exception) {
             throw new WechatAPIException(['method_name' => __METHOD__, 'args' => func_get_args()], $exception->getMessage(), $exception->getCode());
         }
