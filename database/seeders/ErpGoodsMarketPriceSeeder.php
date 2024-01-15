@@ -23,7 +23,7 @@ class ErpGoodsMarketPriceSeeder extends Seeder
                     continue;
                 }
                 if ($key === 4) {
-                    $line_data[$key] = (int)($line_data[$key] ?? 0) * 100;
+                    $line_data[$key] = intval(ceil(intval($line_data[$key]) * 100));
                 }
             }
             $idx++;
@@ -40,12 +40,13 @@ class ErpGoodsMarketPriceSeeder extends Seeder
 
         foreach ($lines as $key => $value) {
             $goods = DB::table('erp_goods')->where(['bar_code' => $value[1], 'specification' => $value[3]])->first();
+//            dump($value[1], $value[3]);
             $insert_data[$key] = [
                 'goods_id' => $goods->id,
                 'bar_code' => $value[1],
                 'name' => $goods->name,
                 'specification' => $value[3],
-                'price' => $value[4]
+                'price' => intval(ceil($value[4]))
             ];
         }
 
