@@ -41,6 +41,10 @@ trait AuthHelpers
         $this->provider = $provider;
 
         $this->setTime();
+
+        $this->setDispatcher($app['events']);
+
+        $this->setRequest($app->refresh('request', $this, 'setRequest'));
     }
 
     /**(无状态 - 意味着是无论在控制器方法、命令行、测试代码中，皆可调用)
