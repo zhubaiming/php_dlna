@@ -50,7 +50,10 @@ return [
 
     'work_weixin' => [
         'corpid' => env('WORK_WX_CORPID'),
-        'corp' => 'default'
+        'corp' => 'default',
+        'rob' => [
+            'exception' => env('WORK_WEIXIN_ROB_EXCEPTION_KEY')
+        ]
     ],
 
     'work_weixin_corp' => [
@@ -58,5 +61,5 @@ return [
             'agentid' => env('WORK_WEIXIN_CORP_DEFAULT_AGENTID'),
             'secret' => env('WORK_WEIXIN_CORP_DEFAULT_SECRET')
         ]
-    ]
+    ],
 ];

@@ -168,7 +168,8 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\ShortMessageServiceProvider::class
+        App\Providers\ShortMessageServiceProvider::class,
+        App\Providers\WorkWeixinServiceProvider::class
     ])->toArray(),
 
     /*
@@ -186,6 +187,7 @@ return [
         // 'Example' => App\Facades\Example::class,
         'WechatMiniApp' => App\Facades\WechatMiniApp::class,
         'SMS' => App\Facades\SMS::class,
+        'WorkWx' => App\Facades\WorkWeixin::class,
     ])->toArray(),
 
 ];
