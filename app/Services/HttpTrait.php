@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
 trait HttpTrait
@@ -14,25 +16,30 @@ trait HttpTrait
 
     protected $response_body;
 
-    private array $jscode_to_session_fake = [
-        ['session_key' => 'fake/49mPa3V6s/nwGh85MWh5DA==', 'openid' => 'fake/o8OZx526yGHmYDirUvD4lrb53Vkg'],
-        ['errcode' => 40163, 'errmsg' => 'fake, code been used, rid: 65927735-29b25d7a-78c318a8'],
-        ['errcode' => 40029, 'errmsg' => 'fake, invalid code, rid: 6592775e-4d7adb76-28101323'],
-        ['errcode' => 40066, 'errmsg' => 'fake, invalid url, rid: 6592b97d-52ca2b4d-4ecc4d48'],
-    ];
-
-    public function getHttp(string $url, array $data = []): void
+    public function getHttp(string $url, array $data = [])
     {
-        $response = $this->baseHttp()->get($url, $data);
+        try {
+            $response = $this->baseHttp()->get($url, $data);
 
-        $this->checkHttpResponse($response);
+            return $this->checkHttpResponse($response);
+        } catch (ConnectionException $connectionException) {
+            dd($connectionException);
+        } catch (RequestException $requestException) {
+            dd($requestException);
+        }
     }
 
     public function postHttp(string $url, array $data = [])
     {
-        $response = $this->baseHttp()->acceptJson()->post($url, $data);
+        try {
+            $response = $this->baseHttp()->post($url, $data);
 
-        $this->checkHttpResponse($response);
+            return $this->checkHttpResponse($response);
+        } catch (ConnectionException $connectionException) {
+            dd($connectionException);
+        } catch (RequestException $requestException) {
+            dd($requestException);
+        }
     }
 
     private function checkHttpResponse($response)
@@ -76,8 +83,10 @@ trait HttpTrait
          */
 
         if ($response->successful() && $response->ok()) {
-            $this->response_body = $response;
-            return true;
+//            $this->response_body = $response;
+//            return true;
+
+            return json_decode($response->body(), true);
         } else {
             $response->throw();
         }
@@ -86,10 +95,10 @@ trait HttpTrait
     private function baseHttp(): \Illuminate\Http\Client\PendingRequest
     {
         if ('local' === config('app.env')) {
-            Http::preventStrayRequests();
+//            Http::preventStrayRequests();
 
             Http::fake([
-                'api.weixin.qq.com/*' => Http::response(['session_key' => 'fake/49mPa3V6s/nwGh85MWh5DA==', 'openid' => 'fake/o8OZx526yGHmYDirUvD4lrb53Vkg'], 200)
+                'api.weixin.qq.com/sns/*' => Http::response(['session_key' => 'fake/49mPa3V6s/nwGh85MWh5DA==', 'openid' => 'fake/o8OZx526yGHmYDirUvD4lrb53Vkg'], 200)
             ]);
         }
 
