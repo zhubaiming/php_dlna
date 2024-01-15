@@ -2,24 +2,26 @@
 
 namespace App\Services\ShortMessage;
 
-use App\Services\WorkWeixin\TextMessage;
+use App\Facades\WorkWeixin;
 
 class Login implements SuperModuleInterface
 {
     public function send(string $prefix, string $phone, string $message): void
     {
-        $services = $this->getServices();
+        $this->aliyun($prefix, $phone, $message);
 
-        foreach ($services as $service) {
-            $service->sendLoginCode($prefix, $phone, ['code' => $message]);
-        }
+        $this->workwx($phone, $message);
     }
 
-    private function getServices(): array
+    private function aliyun($prefix, $phone, $message)
     {
-        return [
-            new \App\Services\Aliyun\ShortMessage('dysmsapi.aliyuncs.com'),
-            new TextMessage()
-        ];
+        (new \App\Services\Aliyun\ShortMessage('dysmsapi.aliyuncs.com'))->sendLoginCode($prefix, $phone, $message);
+    }
+
+    private function workwx($phone, $message)
+    {
+        $user_id = WorkWeixin::channel('work_wx.user')->setCorp('default')->getUserIdByMobile($phone);
+
+        return WorkWeixin::channel('work_wx.appliance')->setCorp('default')->setToUser([$user_id])->sendText('您的验证码为: ' . $message);
     }
 }
