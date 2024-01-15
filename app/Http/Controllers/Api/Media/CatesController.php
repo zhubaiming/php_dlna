@@ -23,7 +23,7 @@ class CatesController extends Controller
     {
         $method = 'get' . ucfirst($type) . 'AllNotPage';
 
-        return $this->success(MediaCateResource::collection($this->modelService->{$method}())->groupBy('type')->toArray());
+        return $this->success(MediaCateResource::collection($this->modelService->{$method}())->groupBy('type'));
     }
 
     /**
