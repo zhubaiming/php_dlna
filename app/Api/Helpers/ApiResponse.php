@@ -11,15 +11,6 @@ trait ApiResponse
 
     protected array $headers = [];
 
-//    protected array $responseHeaders = [];
-//
-//
-//    public function notFound($message = 'Not Found!')
-//    {
-//        return $this->failed($message, HttpCode::HTTP_NOT_FOUND);
-//    }
-//
-
     /**
      * 登录成功接口
      *
@@ -39,7 +30,7 @@ trait ApiResponse
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function success(array $data = []): \Illuminate\Http\JsonResponse // 成功返回数据
+    public function success($data): \Illuminate\Http\JsonResponse // 成功返回数据
     {
         if (empty($data)) {
             return $this->message('success');
