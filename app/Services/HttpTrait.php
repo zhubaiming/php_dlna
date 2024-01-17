@@ -14,6 +14,8 @@ trait HttpTrait
 
     protected $retrySleep = 120;
 
+    protected array $headers = [];
+
     protected $response_body;
 
     public function getHttp(string $url, array $data = [])
@@ -92,6 +94,18 @@ trait HttpTrait
         }
     }
 
+    public function setHeaders(array $headers)
+    {
+        $this->headers = array_merge($this->headers, $headers);
+
+        return $this;
+    }
+
+    private function getHeaders()
+    {
+        return $this->headers;
+    }
+
     private function baseHttp(): \Illuminate\Http\Client\PendingRequest
     {
         if ('local' === config('app.env')) {
@@ -102,7 +116,7 @@ trait HttpTrait
             ]);
         }
 
-        return Http::withHeaders([])
+        return Http::withHeaders($this->getHeaders())
             ->connectTimeout($this->connectTimeout)
             ->retry($this->retryTimes, $this->retrySleep);
     }
