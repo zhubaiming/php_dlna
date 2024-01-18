@@ -89,17 +89,15 @@ class NewOlevod
 
     private function insertOrUpdateList($credentials)
     {
-        $id = $credentials['id'];
-        unset($credentials['id']);
         $credentials['is_update'] = 1;
 
-        $tv = DB::table('new_olevod_tv')->find($id);
+        $tv = DB::table('new_olevod_tv')->find($credentials['id']);
 
         if (is_null($tv)) {
             DB::table('new_olevod_tv')->insert($credentials);
         } else {
             if ($tv->vodTime !== $credentials['vodTime']) {
-                DB::table('new_olevod_tv')->where(['id' => $id])->update($credentials);
+                DB::table('new_olevod_tv')->where(['id' => $credentials['id']])->update($credentials);
             }
         }
     }
