@@ -2,6 +2,7 @@
 
 namespace App\Services\Reptile;
 
+use App\Events\Reptile\Detail;
 use App\Services\HttpTrait;
 use Illuminate\Support\Facades\DB;
 
@@ -86,6 +87,23 @@ class NewOlevod
         return implode("", $t);
     }
 
+    private function insertOrUpdateList($credentials)
+    {
+        $id = $credentials['id'];
+        unset($credentials['id']);
+        $credentials['is_update'] = 1;
+
+        $tv = DB::table('new_olevod_tv')->find($id);
+
+        if (is_null($tv)) {
+            DB::table('new_olevod_tv')->insert($credentials);
+        } else {
+            if ($tv->vodTime !== $credentials['vodTime']) {
+                DB::table('new_olevod_tv')->where(['id' => $id])->update($credentials);
+            }
+        }
+    }
+
     private function getList()
     {
         echo "\033[0;32m开始获取列表数据\033[0m" . PHP_EOL;
@@ -109,7 +127,7 @@ class NewOlevod
                 $response = $this->setHeaders($this->header)->getHttp($this->base_api_url . '/list/true/3/0/0/' . $cate . '/0/0/update/' . $i . '/' . $page_size, ['_vv' => $this->getVV()]);
 
                 foreach ($response['data']['list'] as $detail) {
-                    DB::table('new_olevod_tv')->updateOrInsert(['id' => $detail['id']], $detail);
+                    $this->insertOrUpdateList($detail);
                     $total++;
                 }
             }
@@ -123,22 +141,28 @@ class NewOlevod
         echo "\033[0;32m开始获取详情数据\033[0m" . PHP_EOL;
 
         DB::table('new_olevod_tv')->orderBy('id', 'asc')->lazy()->each(function (object $tv) {
-            sleep(mt_rand(2, 4));
+            if ($tv->is_update === 1) {
+                sleep(mt_rand(2, 4));
 
-            $response = $this->setHeaders($this->header)->getHttp($this->base_api_url . '/detail/' . $tv->id . '/true', ['_vv' => $this->getVV()]);
+                $response = $this->setHeaders($this->header)->getHttp($this->base_api_url . '/detail/' . $tv->id . '/true', ['_vv' => $this->getVV()]);
 
-            echo "\033[36m当前获取 " . $response['data']['name'] . "\033[0m" . PHP_EOL;
+                echo "\033[36m当前获取 " . $response['data']['name'] . "\033[0m" . PHP_EOL;
 
-            $data = $response['data'];
-            $data['urls'] = json_encode($data['urls'], JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES + JSON_NUMERIC_CHECK);
+                $data = $response['data'];
+                $data['urls'] = json_encode($data['urls'], JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES + JSON_NUMERIC_CHECK);
 
-            DB::table('new_olevod_tv_detail')->updateOrInsert(['id' => $data['id']], $data);
+                DB::table('new_olevod_tv_detail')->updateOrInsert(['id' => $data['id']], $data);
+
+                DB::table('new_olevod_tv')->where(['id' => $tv->id])->update(['is_update' => 0]);
+
+                event(new Detail($data['id']));
+            }
         });
     }
 
     public function beginRep()
     {
-//        $this->getList();
+        $this->getList();
 
         echo "========== ********** ========== ********** ==========" . PHP_EOL;
 

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\Reptile\Detail;
 use App\Listeners\LogRegisteredUser;
 use App\Listeners\LogSuccessfulLogin;
+use App\Listeners\Reptile\OlevodDetailToVideo;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -23,6 +25,7 @@ class EventServiceProvider extends ServiceProvider
 //            SendEmailVerificationNotification::class,
         ],
         Login::class => [LogSuccessfulLogin::class],
+        Detail::class => [OlevodDetailToVideo::class],
     ];
 
     /**

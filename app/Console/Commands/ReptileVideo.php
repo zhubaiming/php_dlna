@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Services\Reptile\NewOlevod;
 use App\Services\Reptile\Olevod;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class ReptileVideo extends Command
 {
